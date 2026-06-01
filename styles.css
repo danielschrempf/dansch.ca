@@ -1,0 +1,116 @@
+/* dansch.ca — shared styles. Plain CSS, no build step.
+   Linked from every page with <link rel="stylesheet" href="styles.css">.
+   Edit here once to restyle the whole site. */
+
+/* Brand typefaces — variable fonts, one file each covering the full weight
+   range (Thin 100 → Black 900). Declared here; applied via the font stacks
+   below. A font only downloads when something actually uses it. */
+@font-face {
+  font-family: "Degular";
+  src: url("fonts/DegularVariable.woff2") format("woff2");
+  font-weight: 100 900;     /* the range the file covers, not a single value */
+  font-style: normal;
+  font-display: swap;       /* show fallback text immediately, swap when loaded */
+}
+@font-face {
+  font-family: "Degular Mono";
+  src: url("fonts/DegularMonoVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+  /* Two-colour, black-and-white palette. "White" is a warm cream (#e6e6d4),
+     never pure #fff. Light mode = ink on paper; dark mode just swaps the two.
+     --rule and --muted are *derived* from these, so the whole site is literally
+     two colours — change --bg/--fg and everything follows. */
+  --bg:    #e6e6d4;   /* paper */
+  --fg:    #000000;   /* ink   */
+  --rule:  var(--fg); /* the =====  /  ----- divider lines are ink */
+  --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));  /* receding text */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;    /* ink becomes the background… */
+    --fg: #e6e6d4;    /* …and the cream becomes the text */
+  }
+}
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  /* Site face: Degular Mono (variable). The rest is the system-monospace
+     fallback chain, used only until the woff2 loads. */
+  font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 300;     /* light default — hierarchy comes from caps/underline, not weight */
+  line-height: 1.5;
+}
+
+/* Reading column. Side margins are a share of the viewport: ~10% each side on
+   mobile, ~20% each side on desktop (text sits in the middle ~60%). */
+.sheet {
+  padding: 4rem 10vw 6rem;
+}
+@media (min-width: 48rem) {
+  .sheet { padding: 6rem 20vw 8rem; }
+}
+
+/* Divider rules that echo the ASCII =====  /  -----.
+   A CSS "double" border literally renders as two parallel lines. */
+hr {
+  border: 0;
+  border-top: 3px double var(--rule);   /* the ===== rule */
+  margin: 2rem 0;
+}
+hr.thin {
+  border-top: 1px solid var(--muted);   /* the ----- rule */
+}
+
+a { color: inherit; }            /* links match the text; the underline marks them */
+
+/* Hierarchy is drawn with caps, tracking and underlines — never weight
+   (headings stay at the same light default as the body). */
+h1 {
+  font-size: 1.5rem; font-weight: 300; line-height: 1.25;
+  letter-spacing: .02em; margin: 0 0 .4rem;
+}
+h2 {                                    /* section header: caps + an underline rule */
+  font-size: .9rem; font-weight: 300; margin: 3.5rem 0 1.4rem;
+  text-transform: uppercase; letter-spacing: .18em;
+  border-bottom: 1px solid var(--rule); padding-bottom: .5rem;
+}
+
+/* Paragraph rhythm — generous gaps for the airy feel; tight for the grouped
+   header / footer lines. */
+p { margin: 0 0 1.5rem; }
+p:last-child { margin-bottom: 0; }
+p.muted { margin: 0 0 .35rem; }
+
+nav { font-size: .9rem; }
+.muted { color: var(--muted); }
+
+/* The inline logo: an <svg> dropped straight into the HTML.
+   fill: currentColor means it takes the page's text colour, so it flips
+   automatically in dark mode with no second asset. Width is set here;
+   height stays "auto" so it scales by the SVG's own viewBox aspect ratio. */
+.logo {
+  display: block;
+  width: 180px;
+  height: auto;
+  fill: currentColor;
+  margin-bottom: 1.5rem;
+}
+
+/* CV / bio entries: a titled block — role or award, a muted meta line
+   (org · place · dates), then an optional description paragraph. */
+h3 {                                    /* entry title: caps, no underline, no weight */
+  font-size: 1rem; font-weight: 300; line-height: 1.3;
+  text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .15rem;
+}
+.entry { margin: 0 0 2.6rem; }          /* doubled — airier gaps between entries */
+.entry p { margin: .9rem 0 0; }         /* doubled — title/meta → description */
+.entry .meta { margin: 0; color: var(--muted); }   /* tight under the title */

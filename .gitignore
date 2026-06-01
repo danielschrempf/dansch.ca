@@ -1,5 +1,5 @@
 .DS_Store
 *.log
 
-# local session/handoff note — keep out of the public repo
-HANDOFF.md
+# local build/ops note — keep out of the public repo
+CLAUDE.md

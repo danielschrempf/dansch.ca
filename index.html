@@ -4,8 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>dansch</title>
-<meta name="description" content="dansch — motion graphics &amp; design studio, London UK.">
+<meta name="description" content="dansch — Daniel Schrempf, motion graphics &amp; design, London UK.">
 <style>
+  /* index.html is self-contained (no shared stylesheet). The site face is
+     declared here too; keep it in sync with styles.css. */
+  @font-face {
+    font-family: "Degular Mono";
+    src: url("fonts/DegularMonoVariable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
   :root { color-scheme: light dark; }
   html, body { height: 100%; margin: 0; }
   body {
@@ -13,9 +22,10 @@
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    background: #fbfbf9;
-    color: #1a1a1a;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: #e6e6d4;   /* cream "white" — matches styles.css --bg */
+    color: #000000;        /* ink */
+    font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 400;
     line-height: 1.35;
   }
   pre {
@@ -26,7 +36,7 @@
   }
   a { color: inherit; }
   @media (prefers-color-scheme: dark) {
-    body { background: #0e0e0e; color: #e6e6e6; }
+    body { background: #000000; color: #e6e6d4; }
   }
 </style>
 </head>
@@ -41,10 +51,7 @@
 
 ==========================================
 
-Motion graphics &amp; design studio
-London, UK
-
-------------------------------------------
+<a href="https://vimeo.com/dansch/showreel" target="_blank" rel="noopener">SHOWREEL</a>
 
 Get in touch:  <a href="mailto:daniel@dansch.ca">daniel(a)dansch.ca</a>
 
