@@ -99,10 +99,10 @@ nav { font-size: .9rem; }
    height stays "auto" so it scales by the SVG's own viewBox aspect ratio. */
 .logo {
   display: block;
-  width: 180px;
+  width: 106px;
   height: auto;
   fill: currentColor;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 /* CV / bio entries: a titled block — role or award, a muted meta line
