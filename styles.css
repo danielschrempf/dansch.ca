@@ -105,6 +105,10 @@ nav { font-size: .9rem; }
   margin-bottom: 2rem;
 }
 
+/* When the logo is a home link, keep the click target the size of the logo
+   (not the full column width). The <svg>'s margin-bottom carries through. */
+.logo-link { display: block; width: fit-content; }
+
 /* CV / bio entries: a titled block — role or award, a muted meta line
    (org · place · dates), then an optional description paragraph. */
 h3 {                                    /* entry title: caps, no underline, no weight */
