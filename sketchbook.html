@@ -44,7 +44,7 @@
     padding: 8vmin; box-sizing: border-box;
   }
   #stage svg { max-width: 100%; max-height: 100%; }
-  /* counter: bottom-middle, monospace receipt style — e.g. "8-------", "-7------" */
+  /* counter: bottom-middle, monospace receipt style — e.g. "08 -- -- ...", "-- 07 -- ..." */
   #counter {
     position: fixed; left: 0; right: 0; bottom: 1.5rem;
     text-align: center;
@@ -115,15 +115,26 @@
       return copy;
     }
 
-    // 8/8 -> "8-------", 7/8 -> "-7------", 1/8 -> "-------1". The newest sketch
-    // sits at the left edge; each click walks the marker one step right.
-    // (Designed for up to 9 sketches; double digits widen their own slot.)
+    // 8/8 -> "08 -- -- -- -- -- -- --", 7/8 -> "-- 07 -- -- -- -- -- --",
+    // 1/8 -> "-- -- -- -- -- -- -- 01". The newest sketch sits at the top-left;
+    // each click walks the marker right, wrapping to a new row every 8 cells (so
+    // a 9th sketch opens a second row above the first — #counter is bottom-
+    // anchored, so the receipt grows upward). Every cell is a fixed width (zero-
+    // padded, ≥ 2 digits, widening to 3 past 99) so double-digit counts stay
+    // aligned instead of drifting the dashes.
+    const PER_ROW = 8;
     function counter(idx, total) {
-      const num = idx + 1;              // files[idx] is sketch number idx+1
-      const slot = total - num;         // newest (highest number) -> slot 0 (left)
-      let s = "";
-      for (let p = 0; p < total; p++) s += p === slot ? String(num) : "-";
-      return s;
+      const num = idx + 1;                          // files[idx] is sketch number idx+1
+      const slot = total - num;                     // newest (highest number) -> slot 0 (left)
+      const w = Math.max(2, String(total).length);  // cell width tracks the largest number
+      const dash = "-".repeat(w);
+      const cells = [];
+      for (let p = 0; p < total; p++)
+        cells.push(p === slot ? String(num).padStart(w, "0") : dash);
+      const rows = [];                              // chunk into rows; \n renders via white-space: pre
+      for (let r = 0; r < cells.length; r += PER_ROW)
+        rows.push(cells.slice(r, r + PER_ROW).join(" "));
+      return rows.join("\n");
     }
 
     async function show(idx) {
