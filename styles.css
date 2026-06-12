@@ -22,19 +22,39 @@
 
 :root {
   color-scheme: light dark;
-  /* Two-colour, black-and-white palette. "White" is a warm cream (#e6e6d4),
-     never pure #fff. Light mode = ink on paper; dark mode just swaps the two.
-     --rule and --muted are *derived* from these, so the whole site is literally
-     two colours — change --bg/--fg and everything follows. */
-  --bg:    #e6e6d4;   /* paper */
-  --fg:    #000000;   /* ink   */
-  --rule:  var(--fg); /* the =====  /  ----- divider lines are ink */
-  --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));  /* receding text */
+
+  /* Palette — each hue as a base + lighter tint. */
+  --red:           #FF3333;
+  --red-light:     #FF9999;
+  --orange:        #FF9933;
+  --orange-light:  #FFFF99;
+  --green:         #33CC99;
+  --green-light:   #99FFCC;
+  --spruce:        #003333;
+  --spruce-light:  #339999;
+  --blue:          #0066FF;
+  --blue-light:    #6699FF;
+  --violet:        #6633CC;
+  --violet-light:  #9999CC;
+  --fuschia:       #990066;
+  --fuschia-light: #CC66CC;
+
+  /* Neutrals. */
+  --white:  #FFFFFF;
+  --cream:  #E6E6D4;
+  --dark:   #1D1D1D;
+  --black:  #000000;
+
+  /* Roles — light mode; dark just re-aims them below. */
+  --bg:    var(--cream);
+  --fg:    var(--black);
+  --rule:  var(--fg);
+  --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;    /* ink becomes the background… */
-    --fg: #e6e6d4;    /* …and the cream becomes the text */
+    --bg: var(--black);
+    --fg: var(--cream);
   }
 }
 
