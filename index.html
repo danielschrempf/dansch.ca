@@ -65,6 +65,11 @@
   /* grow into a hollow ring over any wordmark glyph — a hover cue for the whole
      logo (not just links). The .over class is toggled in the script. */
   #dot.over { width: 32px; height: 32px; background-color: transparent; }
+  /* On touch the dot is a deliberate "wipe" to reveal the nav, not a pointer, so
+     it runs bigger: 32px, growing to a 64px ring over a glyph. .touch is set by
+     the script on the first touch (and cleared on mousemove for hybrid devices). */
+  #dot.touch { width: 32px; height: 32px; }
+  #dot.touch.over { width: 64px; height: 64px; }
   a { color: inherit; }
   /* Each wordmark glyph is wrapped at load (script below) into a <span>, or an
      <a> for the four linked letters (a/n/s/c). On hover it flips to its letter's
@@ -251,12 +256,42 @@
   (function () {
     var dot = document.getElementById("dot");
     if (!dot) return;
-    document.addEventListener("mousemove", function (e) {
-      dot.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)";
+    function place(x, y, target) {
+      dot.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
       dot.style.opacity = "1";
-      dot.classList.toggle("over", !!e.target.closest(".g, .rl"));  // ring over glyphs + rule labels
+      dot.classList.toggle("over", !!(target && target.closest(".g, .rl")));  // ring over glyphs + rule labels
+    }
+    document.addEventListener("mousemove", function (e) {
+      dot.classList.remove("touch");   // back to pointer size if a mouse takes over
+      place(e.clientX, e.clientY, e.target);
     });
     document.addEventListener("mouseleave", function () { dot.style.opacity = "0"; });
+
+    // Touch: the dot follows the finger so a swipe "wipes" across the wordmark to
+    // reveal the nav. It runs bigger here (.touch; 32→64px) since it's a deliberate
+    // gesture, not a pointer. The glyph under the finger is lit by replaying
+    // mouseover/mouseout into the wordmark logic above — touchmove's e.target is the
+    // node the touch *started* on, so elementFromPoint is what tracks the finger.
+    var lastG = null;
+    function relight(el) {
+      var g = el && el.closest(".g");
+      if (g === lastG) return;
+      if (lastG) lastG.dispatchEvent(new MouseEvent("mouseout",  { bubbles: true }));
+      lastG = g;
+      if (lastG) lastG.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    }
+    function onTouch(e) {
+      var t = e.touches[0]; if (!t) return;
+      dot.classList.add("touch");
+      var el = document.elementFromPoint(t.clientX, t.clientY);
+      place(t.clientX, t.clientY, el);
+      relight(el);
+    }
+    document.addEventListener("touchstart", onTouch, { passive: true });
+    document.addEventListener("touchmove", function (e) {
+      onTouch(e);
+      e.preventDefault();   // keep the swipe from scrolling / overscrolling the page
+    }, { passive: false });
   })();
 </script>
 </body>
