@@ -62,8 +62,8 @@
     opacity: 0;
     transition: width .2s ease, height .2s ease, background-color .2s ease, opacity .25s ease;
   }
-  /* grow over any clickable link and hollow the fill to a ring — cursor:none
-     means the dot is the only cue. The .over class is toggled in the script. */
+  /* grow into a hollow ring over any wordmark glyph — a hover cue for the whole
+     logo (not just links). The .over class is toggled in the script. */
   #dot.over { width: 32px; height: 32px; background-color: transparent; }
   a { color: inherit; }
   /* Each wordmark glyph is wrapped at load (script below) into a <span>, or an
@@ -73,9 +73,18 @@
      does the flip; both hold 3s and revert together on one timer. */
   .g { text-decoration: none; }
   .g.lit.a { color: var(--blue); }
-  .g.lit.n { color: var(--orange); }
-  .g.lit.s { color: var(--spruce); }
+  .g.lit.n { color: var(--spruce); }
+  .g.lit.s { color: var(--orange); }
   .g.lit.c { color: var(--red); }
+  /* Nav labels punched into the ===== rules: a hovered letter spawns its all-caps
+     name (a real link) centred over that letter in the top or bottom rule, in the
+     wordmark's exact face/size/weight (it's the same <pre> text). Held 8s, then
+     the rule fills back to '='. Built by the script (rebuildRule). */
+  .rl { text-decoration: none; }
+  .rl.a { color: var(--blue); }
+  .rl.n { color: var(--spruce); }
+  .rl.s { color: var(--orange); }
+  .rl.c { color: var(--red); }
   @media (prefers-color-scheme: dark) {
     body { background: #000000; color: #e6e6d4; }
     :root { --dot: #e6e6d4; }
@@ -85,14 +94,17 @@
 <body>
 <div id="dot"></div>
 <pre>
-==========================================
+<span id="rule-top">==========================================</span>
+
 
 <span id="wordmark">      ||                         ||
    //&gt;|| ||&lt;\\ ||&lt;\\ //&gt;|| //&gt;|| ||&lt;\\
    || ||  / || || ||  \ \  ||    || ||
    \\&gt;|| \\&gt;|| || || ||&lt;// \\&gt;|| || ||</span>
 
-==========================================
+
+  
+<span id="rule-bottom">==========================================</span>
 </pre>
 <script>
   // Build the wordmark: each glyph becomes a <span>, or — for the first stroke
@@ -127,7 +139,7 @@
         // navigate via the click handler below — keeps the link count sane.
         var anchor = href && !seen[L];
         var s = document.createElement(anchor ? "a" : "span");
-        s.className = "g " + L + (href ? " lk" : "");
+        s.className = "g " + L;
         if (anchor) {
           s.href = href;
           s.setAttribute("aria-label", LABEL[L]);
@@ -145,11 +157,68 @@
     // capital (and colours, for a/n/s/c), holds 3s after the pointer leaves,
     // then reverts. Timer per glyph, so a fast sweep leaves an independent trail.
     var HOLD = 3000, timers = new WeakMap();
+    // A linked letter also spawns its all-caps label into the top/bottom rule,
+    // centred over that letter (same <pre> text, so size/weight match the glyphs
+    // exactly), held 8s, then the rule fills back to '='. Two labels can share a
+    // rule (about+showreel top, notebook+cv bottom) without overlapping.
+    var LABEL_HOLD = 6000, WIDTH = 42;
+    var RULES = { top: document.getElementById("rule-top"),
+                  bottom: document.getElementById("rule-bottom") };
+    var LABELS = {
+      a: { text: "ABOUT",    center: 11, rule: "top",    href: "about.html" },
+      s: { text: "SHOWREEL", center: 23, rule: "top",    href: "https://vimeo.com/dansch/showreel", ext: true },
+      n: { text: "NOTEBOOK", center: 17, rule: "bottom", href: "notebook.html" },
+      c: { text: "CV",       center: 29, rule: "bottom", href: "cv.html" }
+    };
+    Object.keys(LABELS).forEach(function (L) {
+      var b = LABELS[L];
+      b.letter = L;
+      b.start = b.center - Math.floor(b.text.length / 2);  // first text column
+      b.end = b.start + b.text.length - 1;
+    });
+    var active = {}, labelTimers = {};
+    function rebuildRule(rule) {
+      var el = RULES[rule]; if (!el) return;
+      var cells = [];                                    // one cell per column
+      for (var i = 0; i < WIDTH; i++) cells[i] = { ch: "=", lab: null };
+      Object.keys(LABELS).forEach(function (L) {
+        var b = LABELS[L];
+        if (b.rule !== rule || !active[L]) return;
+        if (b.start - 1 >= 0)  cells[b.start - 1].ch = " ";    // gap before
+        if (b.end + 1 < WIDTH) cells[b.end + 1].ch = " ";      // gap after
+        for (var k = 0; k < b.text.length; k++) cells[b.start + k] = { ch: b.text[k], lab: b };
+      });
+      el.textContent = "";
+      for (var i = 0; i < WIDTH; ) {                     // group runs by label
+        var lab = cells[i].lab, j = i, str = "";
+        while (j < WIDTH && cells[j].lab === lab) { str += cells[j].ch; j++; }
+        if (lab) {
+          var a = document.createElement("a");
+          a.className = "rl " + lab.letter;
+          a.href = lab.href; a.textContent = str;
+          if (lab.ext) { a.target = "_blank"; a.rel = "noopener"; }
+          el.appendChild(a);
+        } else {
+          el.appendChild(document.createTextNode(str));
+        }
+        i = j;
+      }
+    }
+    function spawnLabel(L) {
+      if (!LABELS[L]) return;
+      active[L] = true;
+      rebuildRule(LABELS[L].rule);
+      clearTimeout(labelTimers[L]);
+      labelTimers[L] = setTimeout(function () {
+        active[L] = false; rebuildRule(LABELS[L].rule);
+      }, LABEL_HOLD);
+    }
     function lightOn(e) {
       var g = e.target.closest(".g"); if (!g || !g.dataset.cap) return;
       clearTimeout(timers.get(g)); timers.delete(g);
       g.textContent = g.dataset.cap;
       g.classList.add("lit");
+      spawnLabel(g.dataset.grp);
     }
     function lightOff(e) {
       var g = e.target.closest(".g"); if (!g || timers.has(g)) return;
@@ -185,7 +254,7 @@
     document.addEventListener("mousemove", function (e) {
       dot.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)";
       dot.style.opacity = "1";
-      dot.classList.toggle("over", !!e.target.closest("a, .lk"));  // grow over links
+      dot.classList.toggle("over", !!e.target.closest(".g, .rl"));  // ring over glyphs + rule labels
     });
     document.addEventListener("mouseleave", function () { dot.style.opacity = "0"; });
   })();
