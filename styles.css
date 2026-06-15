@@ -70,13 +70,17 @@ body {
   line-height: 1.5;
 }
 
-/* Reading column. Side margins are a share of the viewport: ~10% each side on
-   mobile, ~20% each side on desktop (text sits in the middle ~60%). */
+/* Reading column — capped at the front-page's 42-char width and centred, so the
+   copy lines up under the page header. Monospace body, so 42ch = 42 characters;
+   max-width keeps a gutter on screens narrower than the column. */
 .sheet {
-  padding: 4rem 10vw 6rem;
+  width: 42ch;
+  max-width: calc(100% - 2rem);
+  margin-inline: auto;
+  padding-block: 4rem 6rem;
 }
 @media (min-width: 48rem) {
-  .sheet { padding: 6rem 20vw 8rem; }
+  .sheet { padding-block: 6rem 8rem; }
 }
 
 /* Divider rules that echo the ASCII =====  /  -----.
@@ -90,6 +94,22 @@ hr.thin {
   border-top: 1px solid var(--muted);   /* the ----- rule */
 }
 
+/* Page header in the front-page ===== style: "PAGE =====… BACK", exactly 42
+   monospace cols, centred on the page. A bare <pre> (no font-family) so it gets
+   the same UA monospace face as index.html's wordmark; weight 400 + the same
+   size clamp make it match the front-page ascii. The page name takes its brand
+   colour; BACK is a plain ink link home. */
+.topnav {
+  width: fit-content;
+  margin: 3rem auto 0;
+  font-size: clamp(0.6rem, 2.6vw, 0.95rem);
+  font-weight: 400;
+}
+.topnav a { color: inherit; text-decoration: none; }   /* BACK: ink, no underline */
+.topnav .a { color: var(--blue); }
+.topnav .c { color: var(--red); }
+.topnav .n { color: var(--spruce); }
+
 a { color: inherit; }            /* links match the text; the underline marks them */
 
 /* Hierarchy is drawn with caps, tracking and underlines — never weight
@@ -98,11 +118,22 @@ h1 {
   font-size: 1.5rem; font-weight: 300; line-height: 1.25;
   letter-spacing: .02em; margin: 0 0 .4rem;
 }
-h2 {                                    /* section header: caps + an underline rule */
-  font-size: .9rem; font-weight: 300; margin: 3.5rem 0 1.4rem;
-  text-transform: uppercase; letter-spacing: .18em;
-  border-bottom: 1px solid var(--rule); padding-bottom: .5rem;
+/* Section header: a "===== TITLE =====" rule, exactly 42 monospace cols, in
+   the front-page ascii style. Stays at the body's weight 300 — Degular Mono's
+   400 glyphs are narrower per-char, so a 400 line of 42 chars falls short of
+   .sheet's 42ch (measured at 300) and the rule no longer spans the column.
+   Two blank lines (≈3rem) above and below for breathing room, matching the
+   rest of the site's rhythm. Colour comes from a modifier class
+   (.red/.blue/.orange/.violet/.green) on the same element. */
+.section {
+  margin: 3rem 0;
+  font-weight: 300;
 }
+.section.red    { color: var(--red); }
+.section.blue   { color: var(--blue); }
+.section.orange { color: var(--orange); }
+.section.violet { color: var(--violet); }
+.section.green  { color: var(--green); }
 
 /* Paragraph rhythm — generous gaps for the airy feel; tight for the grouped
    header / footer lines. */
@@ -129,12 +160,18 @@ nav { font-size: .9rem; }
    (not the full column width). The <svg>'s margin-bottom carries through. */
 .logo-link { display: block; width: fit-content; }
 
-/* CV / about entries: a titled block — role or award, a muted meta line
-   (org · place · dates), then an optional description paragraph. */
+/* CV / about entries: a titled block — role or award, a coloured meta line
+   (org · place · dates) tinted to its section's accent, then an optional
+   description paragraph. */
 h3 {                                    /* entry title: caps, no underline, no weight */
   font-size: 1rem; font-weight: 300; line-height: 1.3;
   text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .15rem;
 }
 .entry { margin: 0 0 2.6rem; }          /* doubled — airier gaps between entries */
 .entry p { margin: .9rem 0 0; }         /* doubled — title/meta → description */
-.entry .meta { margin: 0; color: var(--muted); }   /* tight under the title */
+.entry .meta { margin: 0; }             /* tight under the title; colour set per section below */
+.entry .meta.red    { color: var(--red); }
+.entry .meta.blue   { color: var(--blue); }
+.entry .meta.orange { color: var(--orange); }
+.entry .meta.violet { color: var(--violet); }
+.entry .meta.green  { color: var(--green); }
