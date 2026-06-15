@@ -16,7 +16,11 @@
     font-style: normal;
     font-display: swap;
   }
-  :root { color-scheme: light dark; }
+  :root {
+    color-scheme: light dark;
+    /* wordmark hover hues — one per letter of "dansch" (mirrors styles.css) */
+    --blue: #0066FF; --orange: #FF9933; --spruce: #003333; --red: #FF3333; --dark: #1D1D1D;
+  }
   html, body { height: 100%; margin: 0; }
   body {
     display: flex;
@@ -36,6 +40,15 @@
     white-space: pre;
   }
   a { color: inherit; }
+  /* Each wordmark glyph is wrapped in a <span> at load (script below) so it can
+     hover on its own — thickening to max weight and taking its letter's colour. */
+  .g { transition: color .12s ease, font-weight .12s ease; }
+  .g:hover { font-weight: 900; }
+  .g.a:hover { color: var(--blue); }
+  .g.n:hover { color: var(--orange); }
+  .g.s:hover { color: var(--spruce); }
+  .g.c:hover { color: var(--red); }
+  .g.d:hover, .g.h:hover { color: var(--dark); }
   @media (prefers-color-scheme: dark) {
     body { background: #000000; color: #e6e6d4; }
   }
@@ -45,10 +58,10 @@
 <pre>
 ==========================================
 
-      ||                         ||
+<span id="wordmark">      ||                         ||
    //&gt;|| ||&lt;\\ ||&lt;\\ //&gt;|| //&gt;|| ||&lt;\\
    || ||  / || || ||  \ \  ||    || ||
-   \\&gt;|| \\&gt;|| || || ||&lt;// \\&gt;|| || ||
+   \\&gt;|| \\&gt;|| || || ||&lt;// \\&gt;|| || ||</span>
 
 ==========================================
 
@@ -62,5 +75,36 @@
              dansch (c) 2026
 ==========================================
 </pre>
+<script>
+  // Wrap each wordmark glyph in its own <span> so it can hover independently.
+  // The art is monospace, so each letter of "dansch" occupies a fixed column
+  // band; band → letter → colour (see the .g.* rules above). Spaces stay bare.
+  (function () {
+    var wm = document.getElementById("wordmark");
+    if (!wm) return;
+    function letter(col) {
+      if (col >= 3  && col <= 7)  return "d";
+      if (col >= 9  && col <= 13) return "a";
+      if (col >= 15 && col <= 19) return "n";
+      if (col >= 21 && col <= 25) return "s";
+      if (col >= 27 && col <= 31) return "c";
+      if (col >= 33 && col <= 37) return "h";
+      return "";
+    }
+    var lines = wm.textContent.split("\n");
+    wm.textContent = "";
+    lines.forEach(function (line, i) {
+      if (i) wm.appendChild(document.createTextNode("\n"));
+      for (var col = 0; col < line.length; col++) {
+        var ch = line[col];
+        if (ch === " ") { wm.appendChild(document.createTextNode(ch)); continue; }
+        var s = document.createElement("span");
+        s.className = "g " + letter(col);
+        s.textContent = ch;
+        wm.appendChild(s);
+      }
+    });
+  })();
+</script>
 </body>
 </html>
