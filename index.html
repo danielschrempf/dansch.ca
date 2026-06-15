@@ -20,6 +20,7 @@
     color-scheme: light dark;
     /* wordmark hover hues — one per letter of "dansch" (mirrors styles.css) */
     --blue: #0066FF; --orange: #FF9933; --spruce: #003333; --red: #FF3333; --dark: #1D1D1D;
+    --dot: #000000;   /* custom cursor dot — ink on light, cream on dark (below) */
   }
   html, body { height: 100%; margin: 0; }
   body {
@@ -33,28 +34,56 @@
     font-weight: 400;
     line-height: 1.35;
   }
+  /* swap the OS cursor for our dot. Must name `a` too: links carry a UA
+     cursor:pointer that the value inherited from body can't override.
+     Unconditional on purpose — the dot only shows on mousemove, so touch
+     (no cursor) is unaffected. */
+  body, a { cursor: none; }
   pre {
     margin: 0;
+    position: relative;   /* sits above #dot so glyphs paint over the cursor */
+    z-index: 1;
     /* scales the 42-column block down on narrow screens so it never wraps */
     font-size: clamp(0.6rem, 2.6vw, 0.95rem);
     white-space: pre;
   }
+  /* custom cursor: a dot trailing the pointer (script below), painted behind
+     the <pre> so the wordmark sits on top; pointer-events:none so it never
+     blocks links/glyphs. Hidden until the first move. */
+  #dot {
+    position: fixed; top: 0; left: 0;
+    box-sizing: border-box;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background-color: var(--dot);
+    border: 2px solid var(--dot);   /* persistent stroke; fill hollows on hover */
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: width .2s ease, height .2s ease, background-color .2s ease, opacity .25s ease;
+  }
+  /* grow over any clickable link and hollow the fill to a ring — cursor:none
+     means the dot is the only cue. The .over class is toggled in the script. */
+  #dot.over { width: 32px; height: 32px; background-color: transparent; }
   a { color: inherit; }
-  /* Each wordmark glyph is wrapped in a <span> at load (script below) so it can
-     hover on its own — thickening to max weight and taking its letter's colour. */
-  .g { transition: color .12s ease, font-weight .12s ease; }
-  .g:hover { font-weight: 900; }
-  .g.a:hover { color: var(--blue); }
-  .g.n:hover { color: var(--orange); }
-  .g.s:hover { color: var(--spruce); }
-  .g.c:hover { color: var(--red); }
-  .g.d:hover, .g.h:hover { color: var(--dark); }
+  /* Each wordmark glyph is wrapped at load (script below) into a <span>, or an
+     <a> for the four linked letters (a/n/s/c). On hover it flips to its letter's
+     capital and — for the linked four — takes that letter's colour; d/h flip
+     only, keeping their ink colour. The .lit class drives the colour, the script
+     does the flip; both hold 3s and revert together on one timer. */
+  .g { text-decoration: none; }
+  .g.lit.a { color: var(--blue); }
+  .g.lit.n { color: var(--orange); }
+  .g.lit.s { color: var(--spruce); }
+  .g.lit.c { color: var(--red); }
   @media (prefers-color-scheme: dark) {
     body { background: #000000; color: #e6e6d4; }
+    :root { --dot: #e6e6d4; }
   }
 </style>
 </head>
 <body>
+<div id="dot"></div>
 <pre>
 ==========================================
 
@@ -64,24 +93,19 @@
    \\&gt;|| \\&gt;|| || || ||&lt;// \\&gt;|| || ||</span>
 
 ==========================================
-
-<a href="https://vimeo.com/dansch/showreel" target="_blank" rel="noopener">SHOWREEL</a>
-
-<a href="mailto:daniel@dansch.ca">CONTACT</a>
-
-<a href="cv.html">CV</a>
-
-==========================================
-             dansch (c) 2026
-==========================================
 </pre>
 <script>
-  // Wrap each wordmark glyph in its own <span> so it can hover independently.
+  // Build the wordmark: each glyph becomes a <span>, or — for the first stroke
+  // of a linked letter — an <a> carrying that letter's destination and label.
   // The art is monospace, so each letter of "dansch" occupies a fixed column
-  // band; band → letter → colour (see the .g.* rules above). Spaces stay bare.
+  // band; band → letter → colour/link. Hovering any stroke lights the letter.
   (function () {
     var wm = document.getElementById("wordmark");
     if (!wm) return;
+    // letter → destination + accessible label; d/h have no page yet.
+    var HREF  = { a: "about.html", n: "notebook.html",
+                  s: "https://vimeo.com/dansch/showreel", c: "cv.html" };
+    var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv" };
     function letter(col) {
       if (col >= 3  && col <= 7)  return "d";
       if (col >= 9  && col <= 13) return "a";
@@ -91,19 +115,79 @@
       if (col >= 33 && col <= 37) return "h";
       return "";
     }
-    var lines = wm.textContent.split("\n");
+    var lines = wm.textContent.split("\n"), seen = {};
     wm.textContent = "";
     lines.forEach(function (line, i) {
       if (i) wm.appendChild(document.createTextNode("\n"));
       for (var col = 0; col < line.length; col++) {
         var ch = line[col];
         if (ch === " ") { wm.appendChild(document.createTextNode(ch)); continue; }
-        var s = document.createElement("span");
-        s.className = "g " + letter(col);
+        var L = letter(col), href = HREF[L];
+        // One real <a> per letter (its first stroke); the rest are spans that
+        // navigate via the click handler below — keeps the link count sane.
+        var anchor = href && !seen[L];
+        var s = document.createElement(anchor ? "a" : "span");
+        s.className = "g " + L + (href ? " lk" : "");
+        if (anchor) {
+          s.href = href;
+          s.setAttribute("aria-label", LABEL[L]);
+          if (/^https?:/.test(href)) { s.target = "_blank"; s.rel = "noopener"; }
+          seen[L] = true;
+        }
         s.textContent = ch;
+        s.dataset.o = ch;                        // original glyph, to restore
+        if (L) { s.dataset.cap = L.toUpperCase(); s.dataset.grp = L; }
         wm.appendChild(s);
       }
     });
+
+    // Each stroke lights on its own: on hover/focus it flips to its letter's
+    // capital (and colours, for a/n/s/c), holds 3s after the pointer leaves,
+    // then reverts. Timer per glyph, so a fast sweep leaves an independent trail.
+    var HOLD = 3000, timers = new WeakMap();
+    function lightOn(e) {
+      var g = e.target.closest(".g"); if (!g || !g.dataset.cap) return;
+      clearTimeout(timers.get(g)); timers.delete(g);
+      g.textContent = g.dataset.cap;
+      g.classList.add("lit");
+    }
+    function lightOff(e) {
+      var g = e.target.closest(".g"); if (!g || timers.has(g)) return;
+      timers.set(g, setTimeout(function () {
+        g.textContent = g.dataset.o;
+        g.classList.remove("lit");
+        timers.delete(g);
+      }, HOLD));
+    }
+    wm.addEventListener("mouseover", lightOn);
+    wm.addEventListener("mouseout",  lightOff);
+    wm.addEventListener("focusin",   lightOn);
+    wm.addEventListener("focusout",  lightOff);
+
+    // Click any stroke of a linked letter to navigate; the per-letter <a> handles
+    // its own clicks and keyboard natively, the sibling spans defer to this.
+    wm.addEventListener("click", function (e) {
+      var g = e.target.closest(".g");
+      if (!g || g.tagName === "A") return;
+      var href = HREF[g.dataset.grp];
+      if (!href) return;
+      if (/^https?:/.test(href)) window.open(href, "_blank", "noopener");
+      else location.href = href;
+    });
+  })();
+
+  // Custom cursor: a dot that trails the pointer, painted behind the wordmark
+  // (see #dot styles). Hidden until the first move and whenever the pointer
+  // leaves the window.
+  (function () {
+    var dot = document.getElementById("dot");
+    if (!dot) return;
+    document.addEventListener("mousemove", function (e) {
+      dot.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)";
+      dot.style.opacity = "1";
+      dot.classList.toggle("over", !!e.target.closest("a, .lk"));  // grow over links
+    });
+    document.addEventListener("mouseleave", function () { dot.style.opacity = "0"; });
   })();
 </script>
 </body>

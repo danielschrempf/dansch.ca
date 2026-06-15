@@ -129,7 +129,7 @@ nav { font-size: .9rem; }
    (not the full column width). The <svg>'s margin-bottom carries through. */
 .logo-link { display: block; width: fit-content; }
 
-/* CV / bio entries: a titled block — role or award, a muted meta line
+/* CV / about entries: a titled block — role or award, a muted meta line
    (org · place · dates), then an optional description paragraph. */
 h3 {                                    /* entry title: caps, no underline, no weight */
   font-size: 1rem; font-weight: 300; line-height: 1.3;

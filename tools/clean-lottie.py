@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compress & tidy Lottie JSON for the dansch.ca sketchbook.
+"""Compress & tidy Lottie JSON for the dansch.ca notebook.
 
 Works on exports from After Effects (Bodymovin) and Cavalry — same schema,
 same treatment. Render-preserving by default; the big win is just stripping
@@ -10,7 +10,7 @@ What it does:
   - round floats      to --dp decimals (default 3; exporters emit float noise)
   - drop metadata     editor-only keys: layer/shape names (nm, mn), the meta
                       generator block, empty top-level props/markers
-  - normalise colour  set every solid fill/stroke to black. The sketchbook page
+  - normalise colour  set every solid fill/stroke to black. The notebook page
                       recolours to the theme (--fg) at runtime, so the stored
                       colour is cosmetic; black keeps the source files uniform
                       and visible if JS is off. Skip with --keep-colour.
@@ -19,9 +19,9 @@ Safety: if a file contains baked expressions (a "x":"..." property), names are
 *kept* for that file (expressions can reference them) and a note is printed.
 
 Usage:
-  tools/clean-lottie.py sketchbook/*.json           # tidy in place, report savings
-  tools/clean-lottie.py --dry-run sketchbook/*.json # report only, write nothing
-  tools/clean-lottie.py --dp 6 sketchbook/009.json  # gentler rounding for a delicate one
+  tools/clean-lottie.py notebook/*.json             # tidy in place, report savings
+  tools/clean-lottie.py --dry-run notebook/*.json   # report only, write nothing
+  tools/clean-lottie.py --dp 6 notebook/009.json    # gentler rounding for a delicate one
   tools/clean-lottie.py --keep-colour logo.json     # leave fills/strokes as authored
 """
 import argparse, json, os, sys

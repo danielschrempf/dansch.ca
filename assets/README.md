@@ -26,6 +26,6 @@ There's more markup to copy, but in return the logo can:
 - be styled or animated with CSS,
 - load with zero extra network requests.
 
-This is what `bio.html` and `cv.html` do — see the commented `<svg class="logo">`
-block in `bio.html`. Keep the inline copies and `svg/logo.svg` in sync when you
+This is what `about.html` and `cv.html` do — see the commented `<svg class="logo">`
+block in `about.html`. Keep the inline copies and `svg/logo.svg` in sync when you
 finalise the path.
