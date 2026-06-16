@@ -142,10 +142,7 @@ h1 {
    header / footer lines. */
 p { margin: 0 0 1.5rem; }
 p:last-child { margin-bottom: 0; }
-p.muted { margin: 0 0 .35rem; }
-
 nav { font-size: .9rem; }
-.muted { color: var(--muted); }
 
 /* The inline logo: an <svg> dropped straight into the HTML.
    fill: currentColor means it takes the page's text colour, so it flips
