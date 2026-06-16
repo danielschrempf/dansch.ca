@@ -68,6 +68,10 @@ body {
   font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-weight: 300;     /* light default — hierarchy comes from caps/underline, not weight */
   line-height: 1.5;
+  /* Universal scale: same clamp as .topnav so every element — headings,
+     body, section rules, meta lines — shrinks together on narrow screens.
+     42ch on .sheet always means 42 characters of this size. */
+  font-size: clamp(0.6rem, 2.6vw, 1rem);
 }
 
 /* Reading column — capped at the front-page's 42-char width and centred, so the
@@ -102,8 +106,7 @@ hr.thin {
 .topnav {
   width: fit-content;
   margin: 3rem auto 0;
-  font-size: clamp(0.6rem, 2.6vw, 0.95rem);
-  font-weight: 400;
+  font-weight: 400;   /* slightly heavier than body 300 to match the index wordmark */
 }
 .topnav a { color: inherit; text-decoration: none; }   /* BACK: ink, no underline */
 .topnav .a { color: var(--blue); }
@@ -115,7 +118,7 @@ a { color: inherit; }            /* links match the text; the underline marks th
 /* Hierarchy is drawn with caps, tracking and underlines — never weight
    (headings stay at the same light default as the body). */
 h1 {
-  font-size: 1.5rem; font-weight: 300; line-height: 1.25;
+  font-size: 1.5em; font-weight: 300; line-height: 1.25;
   letter-spacing: .02em; margin: 0 0 .4rem;
 }
 /* Section header: a "===== TITLE =====" rule, exactly 42 monospace cols, in
@@ -164,7 +167,7 @@ nav { font-size: .9rem; }
    (org · place · dates) tinted to its section's accent, then an optional
    description paragraph. */
 h3 {                                    /* entry title: caps, no underline, no weight */
-  font-size: 1rem; font-weight: 300; line-height: 1.3;
+  font-size: 1em; font-weight: 300; line-height: 1.3;
   text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .15rem;
 }
 .entry { margin: 0 0 2.6rem; }          /* doubled — airier gaps between entries */
