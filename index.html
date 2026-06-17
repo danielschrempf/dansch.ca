@@ -1,104 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dansch</title>
-<meta name="description" content="dansch — Daniel Schrempf, motion graphics &amp; design, London UK.">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<style>
-  /* index.html is self-contained (no shared stylesheet). The site face is
-     declared here too; keep it in sync with styles.css. */
-  @font-face {
-    font-family: "Degular Mono";
-    src: url("fonts/DegularMonoVariable.woff2") format("woff2");
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-  }
-  :root {
-    color-scheme: light dark;
-    /* wordmark hover hues — one per letter of "dansch" (mirrors styles.css) */
-    --blue: #0066FF; --orange: #FF9933; --spruce: #003333; --red: #FF3333; --dark: #1D1D1D;
-    --dot: #000000;   /* custom cursor dot — ink on light, cream on dark (below) */
-  }
-  html, body { height: 100%; margin: 0; }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    background: #e6e6d4;   /* cream "white" — matches styles.css --bg */
-    color: #000000;        /* ink */
-    font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-weight: 400;
-    line-height: 1.35;
-  }
-  /* swap the OS cursor for our dot. Must name `a` too: links carry a UA
-     cursor:pointer that the value inherited from body can't override.
-     Unconditional on purpose — the dot only shows on mousemove, so touch
-     (no cursor) is unaffected. */
-  body, a { cursor: none; }
-  pre {
-    margin: 0;
-    position: relative;   /* sits above #dot so glyphs paint over the cursor */
-    z-index: 1;
-    /* scales the 42-column block down on narrow screens so it never wraps */
-    font-size: clamp(0.6rem, 2.6vw, 1rem);
-    white-space: pre;
-  }
-  /* custom cursor: a dot trailing the pointer (script below), painted behind
-     the <pre> so the wordmark sits on top; pointer-events:none so it never
-     blocks links/glyphs. Hidden until the first move. */
-  #dot {
-    position: fixed; top: 0; left: 0;
-    box-sizing: border-box;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background-color: var(--dot);
-    border: 2px solid var(--dot);   /* persistent stroke; fill hollows on hover */
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0;
-    transition: width .2s ease, height .2s ease, background-color .2s ease, opacity .25s ease;
-  }
-  /* grow into a hollow ring over any wordmark glyph — a hover cue for the whole
-     logo (not just links). The .over class is toggled in the script. */
-  #dot.over { width: 32px; height: 32px; background-color: transparent; }
-  /* On touch the dot is a deliberate "wipe" to reveal the nav, not a pointer, so
-     it runs bigger: 32px, growing to a 64px ring over a glyph. .touch is set by
-     the script on the first touch (and cleared on mousemove for hybrid devices). */
-  #dot.touch { width: 32px; height: 32px; }
-  #dot.touch.over { width: 64px; height: 64px; }
-  a { color: inherit; }
-  /* Each wordmark glyph is wrapped at load (script below) into a <span>, or an
-     <a> for the four linked letters (a/n/s/c). On hover it flips to its letter's
-     capital and — for the linked four — takes that letter's colour; d/h flip
-     only, keeping their ink colour. The .lit class drives the colour, the script
-     does the flip; both hold 3s and revert together on one timer. */
-  .g { text-decoration: none; }
-  .g.lit.a { color: var(--blue); }
-  .g.lit.n { color: var(--spruce); }
-  .g.lit.s { color: var(--orange); }
-  .g.lit.c { color: var(--red); }
-  /* Nav labels punched into the ===== rules: a hovered letter spawns its all-caps
-     name (a real link) centred over that letter in the top or bottom rule, in the
-     wordmark's exact face/size/weight (it's the same <pre> text). Held 8s, then
-     the rule fills back to '='. Built by the script (rebuildRule). */
-  .rl { text-decoration: none; }
-  .rl.a { color: var(--blue); }
-  .rl.n { color: var(--spruce); }
-  .rl.s { color: var(--orange); }
-  .rl.c { color: var(--red); }
-  @media (prefers-color-scheme: dark) {
-    body { background: #000000; color: #e6e6d4; }
-    :root { --dot: #e6e6d4; }
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dansch</title>
+  <meta name="description" content="dansch — Daniel Schrempf, motion graphics + design, London UK.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    @font-face {
+      font-family: "Degular Mono";
+      src: url("fonts/DegularMonoVariable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light dark;
+      --blue: #0066FF;
+      --orange: #FF9933;
+      --spruce: #003333;
+      --red: #FF3333;
+      --dot: #000000;
+      --fs: clamp(0.8rem, 2.6vw, 1rem);
+    }
+
+    html {
+      height: 100%;
+      scrollbar-gutter: stable;
+    }
+
+    /* match the inner pages' centring width */
+    body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.5rem;
+      background: #e6e6d4;
+      color: #000000;
+      font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
+    body,
+    a {
+      cursor: none;
+    }
+
+    pre {
+      /* Centre the wordmark glyphs at the viewport middle, deterministically (not
+       flex-centred) so the inner pages can land their header on the exact same rule
+       line — see styles.css .persist-*. The glyphs sit 5 lines below the block top,
+       so margin-top = 50vh − 5 lines; that also puts rule-top / rule-bottom a
+       symmetric ±5 lines from centre. 1.35 = lh. */
+      margin: calc(50vh - 5 * 1.35 * var(--fs)) 0 0;
+      position: relative;
+      z-index: 1;
+      font-size: var(--fs);
+      white-space: pre;
+    }
+
+    #dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--dot);
+      border: 2px solid var(--dot);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: width .2s ease, height .2s ease, background-color .2s ease, opacity .25s ease;
+    }
+
+    #dot.over {
+      width: 32px;
+      height: 32px;
+      background-color: transparent;
+    }
+
+    #dot.touch {
+      width: 32px;
+      height: 32px;
+    }
+
+    #dot.touch.over {
+      width: 64px;
+      height: 64px;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .g {
+      text-decoration: none;
+    }
+
+    .g.lit.a {
+      color: var(--blue);
+    }
+
+    .g.lit.n {
+      color: var(--spruce);
+    }
+
+    .g.lit.s {
+      color: var(--orange);
+    }
+
+    .g.lit.c {
+      color: var(--red);
+    }
+
+    .rl {
+      text-decoration: none;
+    }
+
+    .rl.a {
+      color: var(--blue);
+    }
+
+    .rl.n {
+      color: var(--spruce);
+    }
+
+    .rl.s {
+      color: var(--orange);
+    }
+
+    .rl.c {
+      color: var(--red);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #000000;
+        color: #e6e6d4;
+      }
+
+      :root {
+        --dot: #e6e6d4;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="dot"></div>
-<pre>
+  <div id="dot"></div>
+  <pre>
 <span id="rule-top">==========================================</span>
 
 
@@ -108,247 +165,223 @@
    \\&gt;|| \\&gt;|| || || ||&lt;// \\&gt;|| || ||</span>
 
 
-  
-<span id="rule-bottom">==========================================</span>
-</pre>
-<script>
-  // Build the wordmark: each glyph becomes a <span>, or — for the first stroke
-  // of a linked letter — an <a> carrying that letter's destination and label.
-  // The art is monospace, so each letter of "dansch" occupies a fixed column
-  // band; band → letter → colour/link. Hovering any stroke lights the letter.
-  (function () {
-    var wm = document.getElementById("wordmark");
-    if (!wm) return;
-    // letter → destination + accessible label; d/h have no page yet.
-    var HREF  = { a: "about.html", n: "notebook.html",
-                  s: "https://vimeo.com/dansch/showreel", c: "cv.html" };
-    var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv" };
-    function letter(col) {
-      if (col >= 3  && col <= 7)  return "d";
-      if (col >= 9  && col <= 13) return "a";
-      if (col >= 15 && col <= 19) return "n";
-      if (col >= 21 && col <= 25) return "s";
-      if (col >= 27 && col <= 31) return "c";
-      if (col >= 33 && col <= 37) return "h";
-      return "";
-    }
-    var lines = wm.textContent.split("\n"), seen = {};
-    wm.textContent = "";
-    lines.forEach(function (line, i) {
-      if (i) wm.appendChild(document.createTextNode("\n"));
-      for (var col = 0; col < line.length; col++) {
-        var ch = line[col];
-        if (ch === " ") { wm.appendChild(document.createTextNode(ch)); continue; }
-        var L = letter(col), href = HREF[L];
-        // One real <a> per letter (its first stroke); the rest are spans that
-        // navigate via the click handler below — keeps the link count sane.
-        var anchor = href && !seen[L];
-        var s = document.createElement(anchor ? "a" : "span");
-        s.className = "g " + L;
-        if (anchor) {
-          s.href = href;
-          s.setAttribute("aria-label", LABEL[L]);
-          if (/^https?:/.test(href)) { s.target = "_blank"; s.rel = "noopener"; }
-          seen[L] = true;
-        }
-        s.textContent = ch;
-        s.dataset.o = ch;                        // original glyph, to restore
-        if (L) { s.dataset.cap = L.toUpperCase(); s.dataset.grp = L; }
-        wm.appendChild(s);
-      }
-    });
 
-    // Each stroke lights on its own: on hover/focus it flips to its letter's
-    // capital (and colours, for a/n/s/c), holds 3s after the pointer leaves,
-    // then reverts. Timer per glyph, so a fast sweep leaves an independent trail.
-    var HOLD = 3000, timers = new WeakMap();
-    // A linked letter also spawns its all-caps label into the top/bottom rule,
-    // centred over that letter (same <pre> text, so size/weight match the glyphs
-    // exactly), held 8s, then the rule fills back to '='. Two labels can share a
-    // rule (about+showreel top, notebook+cv bottom) without overlapping.
-    var LABEL_HOLD = 6000, WIDTH = 42;
-    var RULES = { top: document.getElementById("rule-top"),
-                  bottom: document.getElementById("rule-bottom") };
-    var LABELS = {
-      a: { text: "ABOUT",    center: 11, rule: "top",    href: "about.html" },
-      s: { text: "SHOWREEL", center: 23, rule: "top",    href: "https://vimeo.com/dansch/showreel", ext: true },
-      n: { text: "NOTEBOOK", center: 17, rule: "bottom", href: "notebook.html" },
-      c: { text: "CV",       center: 29, rule: "bottom", href: "cv.html" }
-    };
-    Object.keys(LABELS).forEach(function (L) {
-      var b = LABELS[L];
-      b.letter = L;
-      b.start = b.center - Math.floor(b.text.length / 2);  // first text column
-      b.end = b.start + b.text.length - 1;
-    });
-    var active = {}, labelTimers = {};
-    function rebuildRule(rule) {
-      var el = RULES[rule]; if (!el) return;
-      var cells = [];                                    // one cell per column
-      for (var i = 0; i < WIDTH; i++) cells[i] = { ch: "=", lab: null };
+<span id="rule-bottom">==========================================</span></pre>
+  <script>
+    (function () {
+      var wm = document.getElementById("wordmark");
+      if (!wm) return;
+      var HREF = {
+        a: "about.html", n: "notebook.html",
+        s: "https://vimeo.com/dansch/showreel", c: "cv.html"
+      };
+      var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv" };
+      function letter(col) {
+        if (col >= 3 && col <= 7) return "d";
+        if (col >= 9 && col <= 13) return "a";
+        if (col >= 15 && col <= 19) return "n";
+        if (col >= 21 && col <= 25) return "s";
+        if (col >= 27 && col <= 31) return "c";
+        if (col >= 33 && col <= 37) return "h";
+        return "";
+      }
+      var lines = wm.textContent.split("\n"), seen = {};
+      wm.textContent = "";
+      lines.forEach(function (line, i) {
+        if (i) wm.appendChild(document.createTextNode("\n"));
+        for (var col = 0; col < line.length; col++) {
+          var ch = line[col];
+          if (ch === " ") { wm.appendChild(document.createTextNode(ch)); continue; }
+          var L = letter(col), href = HREF[L];
+          var anchor = href && !seen[L];
+          var s = document.createElement(anchor ? "a" : "span");
+          s.className = "g " + L;
+          if (anchor) {
+            s.href = href;
+            s.setAttribute("aria-label", LABEL[L]);
+            if (/^https?:/.test(href)) { s.target = "_blank"; s.rel = "noopener"; }
+            seen[L] = true;
+          }
+          s.textContent = ch;
+          s.dataset.o = ch;
+          if (L) { s.dataset.cap = L.toUpperCase(); s.dataset.grp = L; }
+          wm.appendChild(s);
+        }
+      });
+
+      var HOLD = 3000, timers = new WeakMap();
+      var LABEL_HOLD = 6000, WIDTH = 42;
+      var RULES = {
+        top: document.getElementById("rule-top"),
+        bottom: document.getElementById("rule-bottom")
+      };
+      var LABELS = {
+        a: { text: "ABOUT", center: 11, rule: "top", href: "about.html" },
+        s: { text: "SHOWREEL", center: 23, rule: "top", href: "https://vimeo.com/dansch/showreel", ext: true },
+        n: { text: "NOTEBOOK", center: 17, rule: "bottom", href: "notebook.html" },
+        c: { text: "CV", center: 29, rule: "bottom", href: "cv.html" }
+      };
       Object.keys(LABELS).forEach(function (L) {
         var b = LABELS[L];
-        if (b.rule !== rule || !active[L]) return;
-        if (b.start - 1 >= 0)  cells[b.start - 1].ch = " ";    // gap before
-        if (b.end + 1 < WIDTH) cells[b.end + 1].ch = " ";      // gap after
-        for (var k = 0; k < b.text.length; k++) cells[b.start + k] = { ch: b.text[k], lab: b };
+        b.letter = L;
+        b.start = b.center - Math.floor(b.text.length / 2);
+        b.end = b.start + b.text.length - 1;
       });
-      el.textContent = "";
-      for (var i = 0; i < WIDTH; ) {                     // group runs by label
-        var lab = cells[i].lab, j = i, str = "";
-        while (j < WIDTH && cells[j].lab === lab) { str += cells[j].ch; j++; }
-        if (lab) {
-          var a = document.createElement("a");
-          a.className = "rl " + lab.letter;
-          a.href = lab.href; a.textContent = str;
-          if (lab.ext) { a.target = "_blank"; a.rel = "noopener"; }
-          el.appendChild(a);
-        } else {
-          el.appendChild(document.createTextNode(str));
+      var active = {}, labelTimers = {};
+      function rebuildRule(rule) {
+        var el = RULES[rule]; if (!el) return;
+        var cells = [];
+        for (var i = 0; i < WIDTH; i++) cells[i] = { ch: "=", lab: null };
+        Object.keys(LABELS).forEach(function (L) {
+          var b = LABELS[L];
+          if (b.rule !== rule || !active[L]) return;
+          if (b.start - 1 >= 0) cells[b.start - 1].ch = " ";
+          if (b.end + 1 < WIDTH) cells[b.end + 1].ch = " ";
+          for (var k = 0; k < b.text.length; k++) cells[b.start + k] = { ch: b.text[k], lab: b };
+        });
+        el.textContent = "";
+        for (var i = 0; i < WIDTH;) {
+          var lab = cells[i].lab, j = i, str = "";
+          while (j < WIDTH && cells[j].lab === lab) { str += cells[j].ch; j++; }
+          if (lab) {
+            var a = document.createElement("a");
+            a.className = "rl " + lab.letter;
+            a.href = lab.href; a.textContent = str;
+            if (lab.ext) { a.target = "_blank"; a.rel = "noopener"; }
+            el.appendChild(a);
+          } else {
+            el.appendChild(document.createTextNode(str));
+          }
+          i = j;
         }
-        i = j;
       }
-    }
-    function spawnLabel(L) {
-      if (!LABELS[L]) return;
-      active[L] = true;
-      rebuildRule(LABELS[L].rule);
-      clearTimeout(labelTimers[L]);
-      labelTimers[L] = setTimeout(function () {
-        active[L] = false; rebuildRule(LABELS[L].rule);
-      }, LABEL_HOLD);
-    }
-    function lightOn(e) {
-      var g = e.target.closest(".g"); if (!g || !g.dataset.cap) return;
-      clearTimeout(timers.get(g)); timers.delete(g);
-      g.textContent = g.dataset.cap;
-      g.classList.add("lit");
-      spawnLabel(g.dataset.grp);
-    }
-    function lightOff(e) {
-      var g = e.target.closest(".g"); if (!g || timers.has(g)) return;
-      timers.set(g, setTimeout(function () {
-        g.textContent = g.dataset.o;
-        g.classList.remove("lit");
-        timers.delete(g);
-      }, HOLD));
-    }
-    wm.addEventListener("mouseover", lightOn);
-    wm.addEventListener("mouseout",  lightOff);
-    wm.addEventListener("focusin",   lightOn);
-    wm.addEventListener("focusout",  lightOff);
-
-    // Click any stroke of a linked letter to navigate; the per-letter <a> handles
-    // its own clicks and keyboard natively, the sibling spans defer to this.
-    wm.addEventListener("click", function (e) {
-      var g = e.target.closest(".g");
-      if (!g || g.tagName === "A") return;
-      var href = HREF[g.dataset.grp];
-      if (!href) return;
-      if (/^https?:/.test(href)) window.open(href, "_blank", "noopener");
-      else location.href = href;
-    });
-  })();
-
-  // Custom cursor: a dot that trails the pointer, painted behind the wordmark
-  // (see #dot styles). Hidden until the first move and whenever the pointer
-  // leaves the window.
-  (function () {
-    var dot = document.getElementById("dot");
-    if (!dot) return;
-    function place(x, y, target) {
-      dot.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
-      dot.style.opacity = "1";
-      dot.classList.toggle("over", !!(target && target.closest(".g, .rl")));  // ring over glyphs + rule labels
-    }
-    document.addEventListener("mousemove", function (e) {
-      dot.classList.remove("touch");   // back to pointer size if a mouse takes over
-      place(e.clientX, e.clientY, e.target);
-    });
-    document.addEventListener("mouseleave", function () { dot.style.opacity = "0"; });
-
-    // Touch: the dot follows the finger so a swipe "wipes" across the wordmark to
-    // reveal the nav. It runs bigger here (.touch; 32→64px) since it's a deliberate
-    // gesture, not a pointer. The glyph under the finger is lit by replaying
-    // mouseover/mouseout into the wordmark logic above — touchmove's e.target is the
-    // node the touch *started* on, so elementFromPoint is what tracks the finger.
-    var lastG = null;
-    function relight(el) {
-      var g = el && el.closest(".g");
-      if (g === lastG) return;
-      if (lastG) lastG.dispatchEvent(new MouseEvent("mouseout",  { bubbles: true }));
-      lastG = g;
-      if (lastG) lastG.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
-    }
-
-    // Momentum: velocity sampled over the last N ms of touchmove, then released
-    // into a rAF loop with friction + elastic edge bouncing.
-    var RESTITUTION = 0.72;   // bounce coefficient (0=dead stop, 1=never stops)
-    var FRICTION    = 0.97;   // velocity multiplier per frame (~60fps)
-    var MIN_SPEED   = 0.3;    // px/frame below which the loop stops
-    var px = 0, py = 0, vx = 0, vy = 0, raf = null;
-    var history = [];         // [{x, y, t}] — last ~100ms of moves for velocity
-
-    function stopMomentum() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
-
-    function momentumStep() {
-      var r = dot.classList.contains("touch") && dot.classList.contains("over") ? 32 : 16;
-      // half the visible dot diameter for edge detection
-      vx *= FRICTION; vy *= FRICTION;
-      px += vx; py += vy;
-      if (px - r < 0)                      { px = r;                      vx = -vx * RESTITUTION; }
-      if (px + r > window.innerWidth)      { px = window.innerWidth - r;  vx = -vx * RESTITUTION; }
-      if (py - r < 0)                      { py = r;                      vy = -vy * RESTITUTION; }
-      if (py + r > window.innerHeight)     { py = window.innerHeight - r; vy = -vy * RESTITUTION; }
-      place(px, py, document.elementFromPoint(px, py));
-      relight(document.elementFromPoint(px, py));
-      if (Math.abs(vx) > MIN_SPEED || Math.abs(vy) > MIN_SPEED) {
-        raf = requestAnimationFrame(momentumStep);
-      } else {
-        raf = null;
-        dot.style.opacity = "0";   // fade out when it comes to rest off-finger
+      function spawnLabel(L) {
+        if (!LABELS[L]) return;
+        active[L] = true;
+        rebuildRule(LABELS[L].rule);
+        clearTimeout(labelTimers[L]);
+        labelTimers[L] = setTimeout(function () {
+          active[L] = false; rebuildRule(LABELS[L].rule);
+        }, LABEL_HOLD);
       }
-    }
-
-    function onTouch(e) {
-      var t = e.touches[0]; if (!t) return;
-      stopMomentum();
-      dot.classList.add("touch");
-      px = t.clientX; py = t.clientY;
-      var el = document.elementFromPoint(px, py);
-      place(px, py, el);
-      relight(el);
-      history.push({ x: px, y: py, t: e.timeStamp });
-      if (history.length > 20) history.shift();
-    }
-
-    document.addEventListener("touchstart", function (e) {
-      history = [];
-      onTouch(e);
-    }, { passive: true });
-
-    document.addEventListener("touchmove", function (e) {
-      onTouch(e);
-      e.preventDefault();   // keep the swipe from scrolling / overscrolling the page
-    }, { passive: false });
-
-    document.addEventListener("touchend", function (e) {
-      // compute velocity from moves in the last 80ms
-      var now = e.timeStamp, cutoff = now - 80;
-      var recent = history.filter(function (h) { return h.t >= cutoff; });
-      if (recent.length >= 2) {
-        var first = recent[0], last = recent[recent.length - 1];
-        var dt = (last.t - first.t) / 1000 * 60;   // normalise to 60fps frames
-        if (dt > 0) { vx = (last.x - first.x) / dt; vy = (last.y - first.y) / dt; }
+      function lightOn(e) {
+        var g = e.target.closest(".g"); if (!g || !g.dataset.cap) return;
+        clearTimeout(timers.get(g)); timers.delete(g);
+        g.textContent = g.dataset.cap;
+        g.classList.add("lit");
+        spawnLabel(g.dataset.grp);
       }
-      history = [];
-      if (Math.abs(vx) > MIN_SPEED || Math.abs(vy) > MIN_SPEED) {
-        raf = requestAnimationFrame(momentumStep);
-      } else {
-        dot.style.opacity = "0";
+      function lightOff(e) {
+        var g = e.target.closest(".g"); if (!g || timers.has(g)) return;
+        timers.set(g, setTimeout(function () {
+          g.textContent = g.dataset.o;
+          g.classList.remove("lit");
+          timers.delete(g);
+        }, HOLD));
       }
-    }, { passive: true });
-  })();
-</script>
+      wm.addEventListener("mouseover", lightOn);
+      wm.addEventListener("mouseout", lightOff);
+      wm.addEventListener("focusin", lightOn);
+      wm.addEventListener("focusout", lightOff);
+
+      wm.addEventListener("click", function (e) {
+        var g = e.target.closest(".g");
+        if (!g || g.tagName === "A") return;
+        var href = HREF[g.dataset.grp];
+        if (!href) return;
+        if (/^https?:/.test(href)) window.open(href, "_blank", "noopener");
+        else location.href = href;
+      });
+    })();
+
+    (function () {
+      var dot = document.getElementById("dot");
+      if (!dot) return;
+      function place(x, y, target) {
+        dot.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
+        dot.style.opacity = "1";
+        dot.classList.toggle("over", !!(target && target.closest(".g, .rl")));
+      }
+      document.addEventListener("mousemove", function (e) {
+        dot.classList.remove("touch");
+        place(e.clientX, e.clientY, e.target);
+      });
+      document.addEventListener("mouseleave", function () { dot.style.opacity = "0"; });
+
+      var lastG = null;
+      function relight(el) {
+        var g = el && el.closest(".g");
+        if (g === lastG) return;
+        if (lastG) lastG.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+        lastG = g;
+        if (lastG) lastG.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      }
+
+      var RESTITUTION = 0.72;
+      var FRICTION = 0.97;
+      var MIN_SPEED = 0.3;
+      var px = 0, py = 0, vx = 0, vy = 0, raf = null;
+      var history = [];
+
+      function stopMomentum() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+
+      function momentumStep() {
+        var r = dot.classList.contains("touch") && dot.classList.contains("over") ? 32 : 16;
+        vx *= FRICTION; vy *= FRICTION;
+        px += vx; py += vy;
+        if (px - r < 0) { px = r; vx = -vx * RESTITUTION; }
+        if (px + r > window.innerWidth) { px = window.innerWidth - r; vx = -vx * RESTITUTION; }
+        if (py - r < 0) { py = r; vy = -vy * RESTITUTION; }
+        if (py + r > window.innerHeight) { py = window.innerHeight - r; vy = -vy * RESTITUTION; }
+        place(px, py, document.elementFromPoint(px, py));
+        relight(document.elementFromPoint(px, py));
+        if (Math.abs(vx) > MIN_SPEED || Math.abs(vy) > MIN_SPEED) {
+          raf = requestAnimationFrame(momentumStep);
+        } else {
+          raf = null;
+          dot.style.opacity = "0";
+        }
+      }
+
+      function onTouch(e) {
+        var t = e.touches[0]; if (!t) return;
+        stopMomentum();
+        dot.classList.add("touch");
+        px = t.clientX; py = t.clientY;
+        var el = document.elementFromPoint(px, py);
+        place(px, py, el);
+        relight(el);
+        history.push({ x: px, y: py, t: e.timeStamp });
+        if (history.length > 20) history.shift();
+      }
+
+      document.addEventListener("touchstart", function (e) {
+        history = [];
+        onTouch(e);
+      }, { passive: true });
+
+      document.addEventListener("touchmove", function (e) {
+        onTouch(e);
+        e.preventDefault();   // prevent scroll / overscroll during swipe
+      }, { passive: false });
+
+      document.addEventListener("touchend", function (e) {
+        var now = e.timeStamp, cutoff = now - 80;
+        var recent = history.filter(function (h) { return h.t >= cutoff; });
+        if (recent.length >= 2) {
+          var first = recent[0], last = recent[recent.length - 1];
+          var dt = (last.t - first.t) / 1000 * 60;   // normalise to 60fps frames
+          if (dt > 0) { vx = (last.x - first.x) / dt; vy = (last.y - first.y) / dt; }
+        }
+        history = [];
+        if (Math.abs(vx) > MIN_SPEED || Math.abs(vy) > MIN_SPEED) {
+          raf = requestAnimationFrame(momentumStep);
+        } else {
+          dot.style.opacity = "0";
+        }
+      }, { passive: true });
+    })();
+  </script>
 </body>
+
 </html>

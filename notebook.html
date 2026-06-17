@@ -1,92 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>notebook — dansch</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<style>
-  /* notebook.html is self-contained, like index.html. It follows the same
-     light/dark palette as the rest of the site — ink on cream by day, cream on
-     ink at night — and the sketches themselves are recoloured to --fg at load
-     time (see tint() below), so the line art flips with the theme too. */
-  @font-face {
-    font-family: "Degular Mono";
-    src: url("fonts/DegularMonoVariable.woff2") format("woff2");
-    font-weight: 100 900; font-style: normal; font-display: swap;
-  }
-  :root {
-    color-scheme: light dark;
-    --bg: #e6e6d4;   /* paper */
-    --fg: #000000;   /* ink   */
-    --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #000000; --fg: #e6e6d4; }   /* swap: cream ink on black */
-  }
-  html, body { height: 100%; margin: 0; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-weight: 300;
-    /* the whole viewport is one click target: click advances to the next sketch */
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    overflow: hidden;
-  }
-  /* the animation fills the viewport with breathing room, keeping aspect ratio */
-  #stage {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    padding: 8vmin; box-sizing: border-box;
-  }
-  #stage svg { max-width: 100%; max-height: 100%; }
-  /* counter: bottom-middle, monospace receipt style — e.g. "08 == == ...", "== 07 == ..." */
-  #counter {
-    position: fixed; left: 0; right: 0; bottom: 1.5rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: .8rem;
-    letter-spacing: .5em;
-    white-space: pre;
-    pointer-events: auto;
-    cursor: default;             /* counter is a nav target, not a pointer */
-  }
-  /* page header in the front-page ===== style; a bare <pre> (UA monospace) at
-     weight 400 + the same size clamp matches the wordmark. Fixed top-centre and
-     pointer-events:none so taps still advance the sketch; only BACK opts back
-     in. NOTEBOOK is spruce (invisible on dark by design — the page is hidden). */
-  #topnav {
-    position: fixed; top: 1.5rem; left: 0; right: 0; z-index: 1;
-    margin: 0; text-align: center;
-    font-size: clamp(0.6rem, 2.6vw, 0.95rem);
-    font-weight: 400;
-    color: var(--fg);
-    pointer-events: none;
-  }
-  #topnav a { color: inherit; text-decoration: none; pointer-events: auto; }
-  #topnav .n { color: #003333; }   /* spruce */
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>notebook — dansch</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    @font-face {
+      font-family: "Degular Mono";
+      src: url("fonts/DegularMonoVariable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light dark;
+      --bg: #e6e6d4;
+      --fg: #000000;
+      --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));
+      --fs: clamp(0.8rem, 2.6vw, 1rem);   /* match index/cv so the header lands on its line */
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --fg: #e6e6d4;
+      }
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    html { scrollbar-gutter: stable; }   /* same centring width as the other pages */
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-weight: 300;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8vmin;
+      box-sizing: border-box;
+    }
+
+    #stage svg {
+      max-width: 25%;
+      max-height: 25%;
+    }
+
+    #counter {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 10vh;
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .5em;
+      white-space: pre;
+      pointer-events: auto;
+      cursor: default;
+    }
+
+    #topnav {
+      position: fixed;
+      top: 10vh;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      margin: 0;
+      text-align: center;
+      font-size: var(--fs);
+      line-height: 1.35;
+      font-weight: 400;
+      color: var(--fg);
+      pointer-events: none;
+      /* First paint on the line NOTEBOOK held on the index wordmark rule (bottom
+         rule = persist-bottom: 50vh + 5 lines), measured from its resting top
+         (10vh). .settled slides it home; removing it (on BACK) slides it back to
+         the index line so it hands off to the wordmark. */
+      transform: translateY(calc(50vh + 5 * 1.35 * var(--fs) - 10vh));
+      transition: transform .7s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    body.settled #topnav { transform: translateY(0); }
+
+    /* sketch + counter fade out as the header leaves on BACK */
+    #stage,
+    #counter { transition: opacity .3s ease; }
+
+    body.exiting #stage,
+    body.exiting #counter { opacity: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #topnav { transform: none; transition: none; }
+    }
+
+    #topnav a {
+      color: inherit;
+      text-decoration: none;
+      pointer-events: auto;
+    }
+
+    #topnav .n {
+      color: #003333;
+    }
+  </style>
 </head>
+
 <body>
   <div id="stage" aria-hidden="true"></div>
-  <pre id="topnav"><span class="n">NOTEBOOK</span> ============================ <a href="index.html">BACK</a></pre>
+  <pre id="topnav">============ <span class="n">NOTEBOOK</span> =============== <a href="index.html">BACK</a></pre>
   <div id="counter"></div>
   <script src="vendor/lottie.min.js"></script>
   <script>
     const FOLDER = "notebook/";
     const stage = document.getElementById("stage");
     const counterEl = document.getElementById("counter");
+    const topnav = document.getElementById("topnav");
     const darkMQ = matchMedia("(prefers-color-scheme: dark)");
     // phase: 0 = blank/ready, 1 = animating in, 2 = fully in, 3 = animating out
     let files = [], i = 0, anim = null, seq = 0, phase = 0;
-    const cache = new Map();   // filename -> parsed JSON, original colours kept
+    const cache = new Map();
 
-    // Static hosting can't list a folder, so probe 001.json, 002.json, … upward
-    // until one is missing. The single 404 that ends the probe is expected.
     async function discover() {
       const found = [];
       for (let n = 1; n < 1000; n++) {
@@ -97,7 +150,7 @@
           found.push(name);
         } catch (_) { break; }
       }
-      return found;   // ascending; the last entry is the most recent sketch
+      return found;
     }
 
     async function load(name) {
@@ -106,9 +159,6 @@
       return cache.get(name);
     }
 
-    // The page's current ink (--fg) as a Lottie [r,g,b] in 0–1. Reading the CSS
-    // variable is what lets the sketches track the same light/dark palette as
-    // the rest of the site without hard-coding either colour in here.
     function inkRGB() {
       const hex = getComputedStyle(document.documentElement)
         .getPropertyValue("--fg").trim().replace("#", "");
@@ -116,9 +166,6 @@
       return [0, 2, 4].map((p) => parseInt(h.slice(p, p + 2), 16) / 255);
     }
 
-    // Retint every solid fill/stroke in a Lottie doc to the current ink, working
-    // on a copy. Each sketch is a single colour, so this only swaps the hue to
-    // match the theme — geometry, and fill-vs-stroke, are left exactly as drawn.
     function tint(doc, rgb) {
       const copy = JSON.parse(JSON.stringify(doc));
       (function walk(o) {
@@ -132,35 +179,27 @@
       return copy;
     }
 
-    // 8/8 -> "08 == == == == == == ==", 7/8 -> "== 07 == == == == == ==",
-    // 1/8 -> "== == == == == == == 01". The newest sketch sits at the top-left;
-    // each click walks the marker right, wrapping to a new row every 8 cells (so
-    // a 9th sketch opens a second row above the first — #counter is bottom-
-    // anchored, so the receipt grows upward). Every cell is a fixed width (zero-
-    // padded, ≥ 2 digits, widening to 3 past 99) so double-digit counts stay
-    // aligned instead of drifting the dashes.
     const PER_ROW = 8;
     function counter(idx, total) {
-      const num = idx + 1;                          // files[idx] is sketch number idx+1
-      const slot = total - num;                     // newest (highest number) -> slot 0 (left)
-      const w = Math.max(2, String(total).length);  // cell width tracks the largest number
-      const fill = "=".repeat(w);                    // empty cells: == to match the rules
+      const num = idx + 1;
+      const slot = total - num;
+      const w = Math.max(2, String(total).length);
+      const fill = "=".repeat(w);
       const cells = [];
       for (let p = 0; p < total; p++)
         cells.push(p === slot ? String(num).padStart(w, "0") : fill);
-      const rows = [];                              // chunk into rows; \n renders via white-space: pre
+      const rows = [];
       for (let r = 0; r < cells.length; r += PER_ROW)
         rows.push(cells.slice(r, r + PER_ROW).join(" "));
       return rows.join("\n");
     }
 
-    // Load the animation for idx and immediately play it in.
     async function show(idx) {
-      const mine = ++seq;              // a later click/theme-change supersedes us
+      const mine = ++seq;   // a later click/theme-change supersedes us
       const doc = tint(await load(files[idx]), inkRGB());
       if (mine !== seq) return;
       if (anim) anim.destroy();
-      phase = 1;                       // start animating in immediately
+      phase = 1;
       anim = lottie.loadAnimation({
         container: stage,
         renderer: "svg",
@@ -171,55 +210,67 @@
       });
       anim.setDirection(1);
       anim.goToAndPlay(0, true);
-      // When play-through finishes, settle into the resting phase for next tap.
       anim.addEventListener("complete", () => {
         phase = phase === 1 ? 2 : 0;   // in→fully-in, out→blank
       });
       counterEl.textContent = counter(idx, files.length);
     }
 
-    // Counter click: advance to the next sketch (wrapping), bypassing playback.
     function handleCounterClick(e) {
       e.stopPropagation();
       i = (i - 1 + files.length) % files.length;
       show(i);
     }
 
-    // Body tap: drive in/out playback on the current sketch.
     function handleTap() {
       if (!anim) return;
       if (phase === 1) {
-        // Mid-in tap: snap to fully drawn
         anim.goToAndStop(anim.totalFrames - 1, true);
         phase = 2;
       } else if (phase === 2) {
-        // Fully in → animate out (play in reverse)
         anim.setDirection(-1);
         anim.play();
         phase = 3;
       } else if (phase === 3) {
-        // Mid-out tap: snap to blank
         anim.goToAndStop(0, true);
         phase = 0;
       } else if (phase === 0) {
-        // Blank → animate in again
         anim.setDirection(1);
         anim.goToAndPlay(0, true);
         phase = 1;
       }
     }
 
-    discover().then((list) => {
+    // Slide the header from its persisted (landing-page) line up to the top, then
+    // start the sketches once it's home — keeps the hand-off clean. Double rAF so
+    // the persisted position paints before .settled triggers the transition; the
+    // timeout (≈ slide duration) gates playback without depending on transitionend
+    // (which won't fire under prefers-reduced-motion).
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("settled")));
+    const settled = new Promise((r) => setTimeout(r, 800));
+
+    // BACK reverses the slide: drop the header back to the index line and fade the
+    // sketch out, then navigate — handing the line back to the wordmark.
+    const back = topnav.querySelector("a");
+    if (back) back.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();   // don't also advance the sketch
+      document.body.classList.remove("settled");
+      document.body.classList.add("exiting");
+      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 0 : 700);
+    });
+
+    Promise.all([discover(), settled]).then(([list]) => {
       files = list;
       if (!files.length) { counterEl.textContent = "—"; return; }
-      i = files.length - 1;             // start on the most recent
+      i = files.length - 1;
       show(i);
       document.body.addEventListener("click", handleTap);
       counterEl.addEventListener("click", handleCounterClick);
-      // follow the OS toggling light↔dark: re-render the current sketch in the
-      // new ink (cache means no refetch, just a recolour).
       darkMQ.addEventListener("change", () => show(i));
     });
   </script>
 </body>
+
 </html>

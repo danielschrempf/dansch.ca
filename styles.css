@@ -1,16 +1,9 @@
-/* dansch.ca — shared styles. Plain CSS, no build step.
-   Linked from every page with <link rel="stylesheet" href="styles.css">.
-   Edit here once to restyle the whole site. */
-
-/* Brand typefaces — variable fonts, one file each covering the full weight
-   range (Thin 100 → Black 900). Declared here; applied via the font stacks
-   below. A font only downloads when something actually uses it. */
 @font-face {
   font-family: "Degular";
   src: url("fonts/DegularVariable.woff2") format("woff2");
-  font-weight: 100 900;     /* the range the file covers, not a single value */
+  font-weight: 100 900;
   font-style: normal;
-  font-display: swap;       /* show fallback text immediately, swap when loaded */
+  font-display: swap;
 }
 @font-face {
   font-family: "Degular Mono";
@@ -23,33 +16,23 @@
 :root {
   color-scheme: light dark;
 
-  /* Palette — each hue as a base + lighter tint. */
-  --red:           #FF3333;
-  --red-light:     #FF9999;
-  --orange:        #FF9933;
-  --orange-light:  #FFFF99;
-  --green:         #33CC99;
-  --green-light:   #99FFCC;
-  --spruce:        #003333;
-  --spruce-light:  #339999;
-  --blue:          #0066FF;
-  --blue-light:    #6699FF;
-  --violet:        #6633CC;
-  --violet-light:  #9999CC;
-  --fuschia:       #990066;
-  --fuschia-light: #CC66CC;
+  --red:    #FF3333;
+  --orange: #FF9933;
+  --green:  #33CC99;
+  --spruce: #003333;
+  --blue:   #0066FF;
+  --violet: #6633CC;
 
-  /* Neutrals. */
-  --white:  #FFFFFF;
-  --cream:  #E6E6D4;
-  --dark:   #1D1D1D;
-  --black:  #000000;
+  --cream: #E6E6D4;
+  --black: #000000;
 
-  /* Roles — light mode; dark just re-aims them below. */
   --bg:    var(--cream);
   --fg:    var(--black);
   --rule:  var(--fg);
   --muted: color-mix(in srgb, var(--fg) 55%, var(--bg));
+
+  --fs: clamp(0.8rem, 2.6vw, 1rem);   /* universal type scale */
+  --rest: 10vh;                       /* where the nav settles, in from the top edge */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -58,76 +41,90 @@
   }
 }
 
-html, body { height: 100%; margin: 0; }
+/* Reserve the scrollbar gutter on every page so the centred column is the same
+   width whether or not the page scrolls — otherwise a long page (cv) loses the
+   scrollbar's width and its centred header drifts ~half a cell left of the short
+   pages / the index wordmark. */
+html { height: 100%; scrollbar-gutter: stable; }
 
 body {
+  min-height: 100%;
+  margin: 0;
+  padding-top: var(--rest);   /* the nav settles here; content flows below it */
   background: var(--bg);
   color: var(--fg);
-  /* Site face: Degular Mono (variable). The rest is the system-monospace
-     fallback chain, used only until the woff2 loads. */
   font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-weight: 300;     /* light default — hierarchy comes from caps/underline, not weight */
+  font-weight: 300;
   line-height: 1.5;
-  /* Universal scale: same clamp as .topnav so every element — headings,
-     body, section rules, meta lines — shrinks together on narrow screens.
-     42ch on .sheet always means 42 characters of this size. */
-  font-size: clamp(0.6rem, 2.6vw, 1rem);
+  font-size: var(--fs);
 }
 
-/* Reading column — capped at the front-page's 42-char width and centred, so the
-   copy lines up under the page header. Monospace body, so 42ch = 42 characters;
-   max-width keeps a gutter on screens narrower than the column. */
 .sheet {
   width: 42ch;
   max-width: calc(100% - 2rem);
   margin-inline: auto;
-  padding-block: 4rem 6rem;
+  padding-block: 2.5rem 6rem;
 }
 @media (min-width: 48rem) {
-  .sheet { padding-block: 6rem 8rem; }
+  .sheet { padding-block: 3.5rem 8rem; }
 }
 
-/* Divider rules that echo the ASCII =====  /  -----.
-   A CSS "double" border literally renders as two parallel lines. */
 hr {
   border: 0;
-  border-top: 3px double var(--rule);   /* the ===== rule */
+  border-top: 3px double var(--rule);
   margin: 2rem 0;
 }
 hr.thin {
-  border-top: 1px solid var(--muted);   /* the ----- rule */
+  border-top: 1px solid var(--muted);
 }
 
-/* Page header in the front-page ===== style: "PAGE =====… BACK", exactly 42
-   monospace cols, centred on the page. A bare <pre> (no font-family) so it gets
-   the same UA monospace face as index.html's wordmark; weight 400 + the same
-   size clamp make it match the front-page ascii. The page name takes its brand
-   colour; BACK is a plain ink link home. */
 .topnav {
   width: fit-content;
-  margin: 3rem auto 0;
-  font-weight: 400;   /* slightly heavier than body 300 to match the index wordmark */
+  margin: 0 auto;
+  font-weight: 400;
+  line-height: 1.35;   /* match the index wordmark so the header lands on its line */
+  /* Entry/exit slide. Resting at the top (--rest) is the *default* — so with no JS the
+     page is just a normal top-aligned page. With JS the header instead paints on the
+     line its label holds on the index wordmark rule (--start, per page below — same
+     1.35 lh + --fs as index so the rows coincide) until .settled is added, then slides
+     to rest; it's laid out at --rest, so the offset is (start − rest). nav.js adds
+     .settled on load and drops it on BACK (slide back to the index line, then navigate).
+     The 50vh anchor must match the index <pre>'s. */
+  --start: var(--rest);
+  transform: translateY(0);
+  transition: transform .7s cubic-bezier(.4, 0, .2, 1);
 }
-.topnav a { color: inherit; text-decoration: none; }   /* BACK: ink, no underline */
+body.persist-top    .topnav { --start: calc(50vh - 5 * 1.35 * var(--fs)); }  /* index top rule */
+body.persist-bottom .topnav { --start: calc(50vh + 5 * 1.35 * var(--fs)); }  /* index bottom rule */
+/* about is short: keep its header on the index rule line (≈ centre) with the content
+   below, instead of sliding to the top. rest = start, so the slide distance is 0 — only
+   the content fade remains. (Also sets body padding-top, so the content sits below it.) */
+body.persist-top { --rest: calc(50vh - 5 * 1.35 * var(--fs)); }
+.js body:not(.settled) .topnav { transform: translateY(calc(var(--start) - var(--rest))); }
+
+/* Content fades in once the nav has settled (and out as it leaves). Scoped to .js
+   (set by nav.js before first paint) so the page is never hidden if JS doesn't run. */
+.js .sheet { opacity: 0; transition: opacity .5s ease; }
+.js body.settled .sheet { opacity: 1; transition-delay: .5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js body:not(.settled) .topnav { transform: translateY(0); }
+  .topnav { transition: none; }
+  .js .sheet { opacity: 1; transition: none; }
+}
+
+.topnav a { color: inherit; text-decoration: none; }
 .topnav .a { color: var(--blue); }
 .topnav .c { color: var(--red); }
 .topnav .n { color: var(--spruce); }
 
-a { color: inherit; }            /* links match the text; the underline marks them */
+a { color: inherit; }
 
-/* Hierarchy is drawn with caps, tracking and underlines — never weight
-   (headings stay at the same light default as the body). */
 h1 {
   font-size: 1.5em; font-weight: 300; line-height: 1.25;
   letter-spacing: .02em; margin: 0 0 .4rem;
 }
-/* Section header: a "===== TITLE =====" rule, exactly 42 monospace cols, in
-   the front-page ascii style. Stays at the body's weight 300 — Degular Mono's
-   400 glyphs are narrower per-char, so a 400 line of 42 chars falls short of
-   .sheet's 42ch (measured at 300) and the rule no longer spans the column.
-   Two blank lines (≈3rem) above and below for breathing room, matching the
-   rest of the site's rhythm. Colour comes from a modifier class
-   (.red/.blue/.orange/.violet/.green) on the same element. */
+
 .section {
   margin: 3rem 0;
   font-weight: 300;
@@ -138,40 +135,19 @@ h1 {
 .section.violet { color: var(--violet); }
 .section.green  { color: var(--green); }
 
-/* Paragraph rhythm — generous gaps for the airy feel; tight for the grouped
-   header / footer lines. */
 p { margin: 0 0 1.5rem; }
 p:last-child { margin-bottom: 0; }
 nav { font-size: .9rem; }
 
-/* The inline logo: an <svg> dropped straight into the HTML.
-   fill: currentColor means it takes the page's text colour, so it flips
-   automatically in dark mode with no second asset. Width is set here;
-   height stays "auto" so it scales by the SVG's own viewBox aspect ratio. */
-.logo {
-  display: block;
-  width: 106px;
-  height: auto;
-  fill: currentColor;
-  margin-bottom: 2rem;
-}
-
-/* When the logo is a home link, keep the click target the size of the logo
-   (not the full column width). The <svg>'s margin-bottom carries through. */
-.logo-link { display: block; width: fit-content; }
-
-/* CV / about entries: a titled block — role or award, a coloured meta line
-   (org · place · dates) tinted to its section's accent, then an optional
-   description paragraph. */
-h3 {                                    /* entry title: caps, no underline, no weight */
+h3 {
   font-size: 1em; font-weight: 300; line-height: 1.3;
   text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .15rem;
 }
-.entry { margin: 0 0 2.6rem; }          /* doubled — airier gaps between entries */
-.entry p { margin: .9rem 0 0; }         /* doubled — title/meta → description */
-.entry .meta { margin: 0; }             /* tight under the title; colour set per section below */
-.entry .meta.red    { color: var(--red); }
-.entry .meta.blue   { color: var(--blue); }
-.entry .meta.orange { color: var(--orange); }
-.entry .meta.violet { color: var(--violet); }
-.entry .meta.green  { color: var(--green); }
+.entry { margin: 0 0 2.6rem; }
+.entry p { margin: .9rem 0 0; }
+.entry .meta { margin: 0; }   /* tight under the entry title; colours below work anywhere */
+.meta.red    { color: var(--red); }
+.meta.blue   { color: var(--blue); }
+.meta.orange { color: var(--orange); }
+.meta.violet { color: var(--violet); }
+.meta.green  { color: var(--green); }
