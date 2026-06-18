@@ -19,8 +19,9 @@
 
     // How long to hold before navigating, in ms — match it to the exit animation.
     // Default 700 (≈ the slide); a page with little/no slide sets a shorter
-    // `data-exit` on its <body> (about uses 200, since it only fades).
-    var exitMs = reduce ? 0 : (parseInt(body.dataset.exit, 10) || 700);
+    // `data-exit` on its <body> (about uses 200, since it only fades). Reduced
+    // motion swaps the slide for a .5s fade, so it holds 500 to let that play.
+    var exitMs = reduce ? 500 : (parseInt(body.dataset.exit, 10) || 700);
 
     var back = document.querySelector(".topnav a");
     if (back) back.addEventListener("click", function (e) {

@@ -122,7 +122,9 @@
     body.exiting #bottomnav { opacity: 0; }
 
     @media (prefers-reduced-motion: reduce) {
-      #topnav { transform: none; transition: none; }
+      /* No slide — the header fades in place instead. */
+      #topnav { transform: none; transition: opacity .5s ease; opacity: 0; }
+      body.settled #topnav { opacity: 1; }
     }
 
     #topnav a {
@@ -259,7 +261,7 @@
       e.stopPropagation();   // don't also advance the sketch
       document.body.classList.remove("settled");
       document.body.classList.add("exiting");
-      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 0 : 700);
+      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 500 : 700);
     });
 
     Promise.all([discover(), settled]).then(([list]) => {
