@@ -150,8 +150,7 @@
     const bottomnav = document.getElementById("bottomnav");
     const topnav = document.getElementById("topnav");
     const darkMQ = matchMedia("(prefers-color-scheme: dark)");
-    // phase: 0 = blank/ready, 1 = animating in, 2 = fully in, 3 = animating out
-    let files = [], i = 0, anim = null, seq = 0, phase = 0;
+    let files = [], i = 0, anim = null, seq = 0;
     const cache = new Map();
 
     async function discover() {
@@ -198,50 +197,23 @@
       const doc = tint(await load(files[idx]), inkRGB());
       if (mine !== seq) return;
       if (anim) anim.destroy();
-      phase = 1;
       anim = lottie.loadAnimation({
         container: stage,
         renderer: "svg",
-        loop: false,
-        autoplay: false,
+        loop: true,
+        autoplay: true,
         animationData: doc,
         rendererSettings: { preserveAspectRatio: "xMidYMid meet" },
       });
-      anim.setDirection(1);
-      anim.goToAndPlay(0, true);
-      anim.addEventListener("complete", () => {
-        phase = phase === 1 ? 2 : 0;   // in→fully-in, out→blank
-      });
     }
 
-    // Bottom-nav step: move to the prev/next sketch, wrapping at either end. Stops
-    // propagation so the click doesn't also replay the current sketch via handleTap.
+    // Bottom-nav step: move to the prev/next sketch, wrapping at either end.
     function go(step) {
       return (e) => {
         e.preventDefault();
-        e.stopPropagation();
         i = (i + step + files.length) % files.length;
         show(i);
       };
-    }
-
-    function handleTap() {
-      if (!anim) return;
-      if (phase === 1) {
-        anim.goToAndStop(anim.totalFrames - 1, true);
-        phase = 2;
-      } else if (phase === 2) {
-        anim.setDirection(-1);
-        anim.play();
-        phase = 3;
-      } else if (phase === 3) {
-        anim.goToAndStop(0, true);
-        phase = 0;
-      } else if (phase === 0) {
-        anim.setDirection(1);
-        anim.goToAndPlay(0, true);
-        phase = 1;
-      }
     }
 
     // Slide the header from its persisted (landing-page) line up to the top, then
@@ -258,7 +230,6 @@
     const back = topnav.querySelector("a");
     if (back) back.addEventListener("click", (e) => {
       e.preventDefault();
-      e.stopPropagation();   // don't also advance the sketch
       document.body.classList.remove("settled");
       document.body.classList.add("exiting");
       setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 500 : 700);
@@ -270,7 +241,6 @@
       i = files.length - 1;
       show(i);
       document.body.classList.add("ready");       // fade the bottom nav in
-      document.body.addEventListener("click", handleTap);
       bottomnav.querySelector(".prev").addEventListener("click", go(+1));   // newer
       bottomnav.querySelector(".next").addEventListener("click", go(-1));   // older
       darkMQ.addEventListener("change", () => show(i));
