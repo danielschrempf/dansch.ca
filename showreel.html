@@ -67,11 +67,18 @@
          (wide screens) the frame is 70vh tall, leaving 15vh top/bottom, so the top
          sits just under the nav; narrow screens fall back to full 100vw width. */
       width: min(100vw, calc(70vh * 45 / 32));
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;   /* clip the oversized iframe (below): kills the edge seam + rounds the corners */
     }
 
     #stage iframe {
-      width: 100%;
-      height: 100%;
+      /* Vimeo leaves a ~1px lighter seam at the player's own edge (subpixel scaling),
+         visible even in dark mode and uncroppable from outside the iframe. Oversize 2px
+         each side and let .frame clip it off — the reel's edges are black, so it's free. */
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      margin: -2px;
       border: 0;
       display: block;
     }
