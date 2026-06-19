@@ -65,10 +65,10 @@
       /* Centred, as wide as fits — but cap the height so the frame never clips and
          its top clears the nav (rests at --rest = 10vh). When the height bound binds
          (wide screens) the frame is 70vh tall, leaving 15vh top/bottom, so the top
-         sits just under the nav; narrow screens fall back to full 100vw width. */
-      width: min(100vw, calc(70vh * 45 / 32));
+         sits just under the nav; narrow screens fall back to 90vw, with a small gutter. */
+      width: min(90vw, calc(70vh * 45 / 32));
       background: #000;
-      border-radius: 16px;
+      border-radius: 8px;
       overflow: hidden;   /* clip the oversized iframe (below): kills the edge seam + rounds the corners */
     }
 
