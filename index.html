@@ -22,6 +22,7 @@
       --orange: #FF9933;
       --spruce: #003333;
       --red: #FF3333;
+      --green: #33CC99;
       --dot: #000000;
       --fs: clamp(0.8rem, 2.6vw, 1rem);
     }
@@ -132,6 +133,10 @@
       color: var(--red);
     }
 
+    .g.lit.h {
+      color: var(--green);
+    }
+
     .rl {
       text-decoration: none;
     }
@@ -150,6 +155,10 @@
 
     .rl.c {
       color: var(--red);
+    }
+
+    .rl.h {
+      color: var(--green);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -185,9 +194,9 @@
       if (!wm) return;
       var HREF = {
         a: "about.html", n: "notebook.html",
-        s: "showreel.html", c: "cv.html"
+        s: "showreel.html", c: "cv.html", h: "hi.html"
       };
-      var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv" };
+      var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv", h: "hi" };
       function letter(col) {
         if (col >= 3 && col <= 7) return "d";
         if (col >= 9 && col <= 13) return "a";
@@ -231,7 +240,8 @@
         a: { text: "ABOUT", center: 11, rule: "top", href: "about.html" },
         s: { text: "SHOWREEL", center: 23, rule: "top", href: "showreel.html" },
         n: { text: "NOTEBOOK", center: 17, rule: "bottom", href: "notebook.html" },
-        c: { text: "CV", center: 29, rule: "bottom", href: "cv.html" }
+        c: { text: "CV", center: 29, rule: "bottom", href: "cv.html" },
+        h: { text: "HI", center: 35, rule: "top", href: "hi.html" }
       };
       Object.keys(LABELS).forEach(function (L) {
         var b = LABELS[L];
