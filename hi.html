@@ -72,8 +72,12 @@
     }
 
     #stage iframe {
-      width: 100%;
-      height: 100%;
+      /* Oversize a few px and let .frame clip it — same trick as showreel: hides any
+         hairline seam at the iframe's edge. The form centres its content, so cropping
+         the outer couple px costs nothing. */
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      margin: -2px;
       border: 0;
       display: block;
     }
