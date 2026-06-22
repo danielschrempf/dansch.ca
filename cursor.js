@@ -1,4 +1,4 @@
-// Shared custom cursor for the inner pages (about, cv, showreel, hi, notebook).
+// Shared custom cursor for the inner pages (about, cv, showreel, hi, demos, notebook).
 // index.html keeps its own inline copy (it's self-contained and ties the cursor to
 // the wordmark glyphs); this is the same dot/ring, generalised to grow over any link.
 //

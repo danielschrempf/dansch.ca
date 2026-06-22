@@ -4,249 +4,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
   <title>notebook — dansch</title>
+  <meta name="description" content="Notebook — notes from Daniel Schrempf, motion graphics + design, London England.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <style>
-    @font-face {
-      font-family: "Degular Mono";
-      src: url("fonts/DegularMonoVariable.woff2") format("woff2");
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    :root {
-      color-scheme: light dark;
-      --bg: #e6e6d4;
-      --fg: #000000;
-      --fs: clamp(0.8rem, 2.6vw, 1rem);   /* match index/cv so the header lands on its line */
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #000000;
-        --fg: #e6e6d4;
-      }
-    }
-
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-    }
-
-    html { scrollbar-gutter: stable; }   /* same centring width as the other pages */
-
-    body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      font-weight: 400;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      overflow: hidden;
-    }
-
-    #stage {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8vmin;
-      box-sizing: border-box;
-    }
-
-    #stage svg {
-      max-width: 25%;
-      max-height: 25%;
-    }
-
-    /* Bottom nav — mirrors #topnav: PREVIOUS ===…=== NEXT, full ink, fades in once
-       the first sketch is up. Links opt back into pointer events; the rest of the
-       line stays click-through so a tap anywhere still replays the sketch. */
-    #bottomnav {
-      position: fixed;
-      bottom: 10vh;
-      left: 0;
-      right: 0;
-      z-index: 1;
-      margin: 0;
-      text-align: center;
-      font-size: var(--fs);
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--fg);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .4s ease;
-    }
-
-    #bottomnav a {
-      color: inherit;
-      text-decoration: none;
-      pointer-events: auto;
-    }
-
-    body.ready #bottomnav { opacity: 1; }
-
-    #topnav {
-      position: fixed;
-      top: 10vh;
-      left: 0;
-      right: 0;
-      z-index: 1;
-      margin: 0;
-      text-align: center;
-      font-size: var(--fs);
-      line-height: 1.35;
-      font-weight: 400;
-      color: var(--fg);
-      pointer-events: none;
-      /* First paint on the line NOTEBOOK held on the index wordmark rule (bottom
-         rule = persist-bottom: 50vh + 5 lines), measured from its resting top
-         (10vh). .settled slides it home; removing it (on BACK) slides it back to
-         the index line so it hands off to the wordmark. */
-      transform: translateY(calc(50vh + 5 * 1.35 * var(--fs) - 10vh));
-      transition: transform .7s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    body.settled #topnav { transform: translateY(0); }
-
-    /* sketch + bottom nav fade out as the header leaves on BACK */
-    #stage { transition: opacity .3s ease; }
-
-    body.exiting #stage,
-    body.exiting #bottomnav { opacity: 0; }
-
-    @media (prefers-reduced-motion: reduce) {
-      /* No slide — the header fades in place instead. */
-      #topnav { transform: none; transition: opacity .5s ease; opacity: 0; }
-      body.settled #topnav { opacity: 1; }
-    }
-
-    #topnav a {
-      color: inherit;
-      text-decoration: none;
-      pointer-events: auto;
-    }
-
-    #topnav .n {
-      color: #003333;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <script src="nav.js"></script>
   <script src="cursor.js"></script>
 </head>
 
-<body>
-  <div id="stage" aria-hidden="true"></div>
-  <pre id="topnav">============ <span class="n">NOTEBOOK</span> =============== <a href="index.html">BACK</a></pre>
-  <pre id="bottomnav"><a href="#" class="prev">PREVIOUS</a> ============================ <a href="#" class="next">NEXT</a></pre>
-  <script src="vendor/lottie.min.js"></script>
-  <script>
-    const FOLDER = "notebook/";
-    const stage = document.getElementById("stage");
-    const bottomnav = document.getElementById("bottomnav");
-    const topnav = document.getElementById("topnav");
-    const darkMQ = matchMedia("(prefers-color-scheme: dark)");
-    let files = [], i = 0, anim = null, seq = 0;
-    const cache = new Map();
+<body class="persist-bottom">
+  <pre class="topnav">============ <span class="n">NOTEBOOK</span> =============== <a href="index.html">BACK</a></pre>
+  <main class="sheet">
 
-    async function discover() {
-      const found = [];
-      for (let n = 1; n < 1000; n++) {
-        const name = String(n).padStart(3, "0") + ".json";
-        try {
-          const res = await fetch(FOLDER + name, { method: "HEAD" });
-          if (!res.ok) break;
-          found.push(name);
-        } catch (_) { break; }
-      }
-      return found;
-    }
+    <pre class="section spruce">================= NOTES ==================</pre>
 
-    async function load(name) {
-      if (!cache.has(name))
-        cache.set(name, await (await fetch(FOLDER + name)).json());
-      return cache.get(name);
-    }
+    <div class="entry">
+      <p class="meta spruce">2026-06-22</p>
+      <p>This is where I'll keep working notes — short writeups on motion design,
+        scripting and expressions, the odd experiment, and whatever else is worth
+        remembering. More to come.</p>
+    </div>
 
-    function inkRGB() {
-      const hex = getComputedStyle(document.documentElement)
-        .getPropertyValue("--fg").trim().replace("#", "");
-      const h = hex.length === 3 ? hex.replace(/./g, "$&$&") : hex;
-      return [0, 2, 4].map((p) => parseInt(h.slice(p, p + 2), 16) / 255);
-    }
-
-    function tint(doc, rgb) {
-      const copy = JSON.parse(JSON.stringify(doc));
-      (function walk(o) {
-        if (Array.isArray(o)) return o.forEach(walk);
-        if (o && typeof o === "object") {
-          if (o.c && Array.isArray(o.c.k) && typeof o.c.k[0] === "number")
-            o.c.k = [rgb[0], rgb[1], rgb[2], o.c.k[3] ?? 1];
-          for (const k in o) walk(o[k]);
-        }
-      })(copy);
-      return copy;
-    }
-
-    async function show(idx) {
-      const mine = ++seq;   // a later click/theme-change supersedes us
-      const doc = tint(await load(files[idx]), inkRGB());
-      if (mine !== seq) return;
-      if (anim) anim.destroy();
-      anim = lottie.loadAnimation({
-        container: stage,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        animationData: doc,
-        rendererSettings: { preserveAspectRatio: "xMidYMid meet" },
-      });
-    }
-
-    // Bottom-nav step: move to the prev/next sketch, wrapping at either end.
-    function go(step) {
-      return (e) => {
-        e.preventDefault();
-        i = (i + step + files.length) % files.length;
-        show(i);
-      };
-    }
-
-    // Slide the header from its persisted (landing-page) line up to the top, then
-    // start the sketches once it's home — keeps the hand-off clean. Double rAF so
-    // the persisted position paints before .settled triggers the transition; the
-    // timeout (≈ slide duration) gates playback without depending on transitionend
-    // (which won't fire under prefers-reduced-motion).
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("settled")));
-    const settled = new Promise((r) => setTimeout(r, 800));
-
-    // BACK reverses the slide: drop the header back to the index line and fade the
-    // sketch out, then navigate — handing the line back to the wordmark.
-    const back = topnav.querySelector("a");
-    if (back) back.addEventListener("click", (e) => {
-      e.preventDefault();
-      document.body.classList.remove("settled");
-      document.body.classList.add("exiting");
-      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 500 : 700);
-    });
-
-    Promise.all([discover(), settled]).then(([list]) => {
-      files = list;
-      if (!files.length) return;                  // no sketches — leave the nav hidden
-      i = files.length - 1;
-      show(i);
-      document.body.classList.add("ready");       // fade the bottom nav in
-      bottomnav.querySelector(".prev").addEventListener("click", go(+1));   // newer
-      bottomnav.querySelector(".next").addEventListener("click", go(-1));   // older
-      darkMQ.addEventListener("change", () => show(i));
-    });
-  </script>
+  </main>
 </body>
 
 </html>

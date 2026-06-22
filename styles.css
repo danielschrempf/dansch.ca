@@ -133,6 +133,7 @@ h1 {
 .section.orange { color: var(--orange); }
 .section.violet { color: var(--violet); }
 .section.green  { color: var(--green); }
+.section.spruce { color: var(--spruce); }
 
 p { margin: 0 0 1.5rem; }
 p:last-child { margin-bottom: 0; }
@@ -150,3 +151,4 @@ h3 {
 .meta.orange { color: var(--orange); }
 .meta.violet { color: var(--violet); }
 .meta.green  { color: var(--green); }
+.meta.spruce { color: var(--spruce); }

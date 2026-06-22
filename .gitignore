@@ -3,3 +3,7 @@
 
 # local build/ops note — keep out of the public repo
 CLAUDE.md
+
+# python
+__pycache__/
+*.pyc

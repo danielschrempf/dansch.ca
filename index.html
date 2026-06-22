@@ -23,6 +23,7 @@
       --spruce: #003333;
       --red: #FF3333;
       --green: #33CC99;
+      --fuchsia: #990066;
       --dot: #000000;
       --fs: clamp(0.8rem, 2.6vw, 1rem);
     }
@@ -137,6 +138,10 @@
       color: var(--green);
     }
 
+    .g.lit.d {
+      color: var(--fuchsia);
+    }
+
     .rl {
       text-decoration: none;
     }
@@ -159,6 +164,10 @@
 
     .rl.h {
       color: var(--green);
+    }
+
+    .rl.d {
+      color: var(--fuchsia);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -193,10 +202,10 @@
       var wm = document.getElementById("wordmark");
       if (!wm) return;
       var HREF = {
-        a: "about.html", n: "notebook.html",
+        d: "demos.html", a: "about.html", n: "notebook.html",
         s: "showreel.html", c: "cv.html", h: "hi.html"
       };
-      var LABEL = { a: "about", n: "notebook", s: "showreel", c: "cv", h: "hi" };
+      var LABEL = { d: "demos", a: "about", n: "notebook", s: "showreel", c: "cv", h: "hi" };
       function letter(col) {
         if (col >= 3 && col <= 7) return "d";
         if (col >= 9 && col <= 13) return "a";
@@ -239,6 +248,7 @@
       var LABELS = {
         a: { text: "ABOUT", center: 11, rule: "top", href: "about.html" },
         s: { text: "SHOWREEL", center: 23, rule: "top", href: "showreel.html" },
+        d: { text: "DEMOS", center: 5, rule: "bottom", href: "demos.html" },
         n: { text: "NOTEBOOK", center: 17, rule: "bottom", href: "notebook.html" },
         c: { text: "CV", center: 29, rule: "bottom", href: "cv.html" },
         h: { text: "HI", center: 33, rule: "top", href: "hi.html" }
