@@ -1,14 +1,5 @@
-// Shared custom cursor for the inner pages (about, cv, showreel, hi, demos, notebook).
-// index.html keeps its own inline copy (it's self-contained and ties the cursor to
-// the wordmark glyphs); this is the same dot/ring, generalised to grow over any link.
-//
-// Self-injecting: a page only needs <script src="cursor.js"> at the END of its <head>
-// (after its own styles, so the injected `cursor: none` wins). It creates the #dot
-// element + styles and replaces the OS cursor with a cream/ink dot that swells to a
-// ring over links. Pointer-only by construction: it just listens for `mousemove`, so
-// touch devices never light it up and keep native scroll/taps (no media query needed —
-// hover/pointer queries silently fail in some browsers anyway). Over a cross-origin
-// iframe (showreel/hi) the browser stops sending moves, so the dot fades there.
+// Shared custom cursor for the inner pages: a dot that swells to a ring over links.
+// Self-injecting (#dot + styles); link as the last <head> script. Mouse-only.
 (function () {
   var style = document.createElement("style");
   style.textContent = [

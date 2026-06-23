@@ -21,7 +21,6 @@
       --bg: #e6e6d4;
       --fg: #000;
       --fs: clamp(0.8rem, 2.6vw, 1rem);
-      /* match index/cv so the header lands on its line */
     }
 
     @media (prefers-color-scheme: dark) {
@@ -41,8 +40,6 @@
       scrollbar-gutter: stable;
     }
 
-    /* same centring width as the other pages */
-
     body {
       background: var(--bg);
       color: var(--fg);
@@ -51,7 +48,6 @@
       overflow: hidden;
     }
 
-    /* The player sits centred; full-bleed 100vw, 16:9, no padding. */
     #stage {
       position: fixed;
       inset: 0;
@@ -71,23 +67,14 @@
     }
 
     #stage .frame {
-      aspect-ratio: 45 / 32;
-      /* the reel's native ratio (Vimeo's 71.11% padding) */
-      /* Centred, as wide as fits — but cap the height so the frame never clips and
-         its top clears the nav (rests at --rest = 10vh). When the height bound binds
-         (wide screens) the frame is 70vh tall, leaving 15vh top/bottom, so the top
-         sits just under the nav; narrow screens fall back to 90vw, with a small gutter. */
+      aspect-ratio: 45 / 32;   /* the reel's native ratio */
       width: min(90vw, calc(70vh * 45 / 32));
       background: #000;
       border-radius: 8px;
-      overflow: hidden;
-      /* clip the oversized iframe (below): kills the edge seam + rounds the corners */
+      overflow: hidden;   /* clip the oversized iframe (seam crop) */
     }
 
     #stage iframe {
-      /* Vimeo leaves a ~1px lighter seam at the player's own edge (subpixel scaling),
-         visible even in dark mode and uncroppable from outside the iframe. Oversize 2px
-         each side and let .frame clip it off — the reel's edges are black, so it's free. */
       width: calc(100% + 4px);
       height: calc(100% + 4px);
       margin: -2px;
@@ -108,30 +95,6 @@
       font-weight: 400;
       color: var(--fg);
       pointer-events: none;
-      /* First paint on the line SHOWREEL holds on the index wordmark rule (top
-         rule = persist-top: 50vh − 5 lines), measured from its resting top (10vh).
-         .settled slides it home; removing it (on BACK) slides it back to the index
-         line so it hands off to the wordmark. */
-      transform: translateY(calc(50vh - 5 * 1.35 * var(--fs) - 10vh));
-      transition: transform .7s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    body.settled #topnav {
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-      /* No slide — the header fades in place instead. */
-      #topnav {
-        transform: none;
-        transition: opacity .5s ease;
-        opacity: 0;
-      }
-
-      body.settled #topnav {
-        opacity: 1;
-      }
     }
 
     #topnav a {
@@ -144,6 +107,7 @@
       color: #06F;
     }
   </style>
+  <script src="print.js"></script>
   <script src="cursor.js"></script>
 </head>
 
@@ -159,23 +123,16 @@
   <pre id="topnav">================== <span class="s">SHOWREEL</span> ========= <a href="index.html">BACK</a></pre>
   <script>
     const topnav = document.getElementById("topnav");
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Slide the header from its persisted (landing-page) line up to the top, then
-    // fade the player in behind it. Double rAF so the persisted position paints
-    // before .settled triggers the transition; the timeout (≈ slide duration) gates
-    // the fade without depending on transitionend (which won't fire under reduce).
-    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("settled")));
-    setTimeout(() => document.body.classList.add("ready"), reduce ? 0 : 800);
+    // print the header on, then fade the player in
+    Print.in(topnav, () => document.body.classList.add("ready"));
 
-    // BACK reverses the slide: drop the header back to the index line and fade the
-    // player out, then navigate — handing the line back to the wordmark.
+    // BACK: un-print + fade out, then navigate
     const back = topnav.querySelector("a");
     if (back) back.addEventListener("click", (e) => {
       e.preventDefault();
-      document.body.classList.remove("settled");
       document.body.classList.add("exiting");
-      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 500 : 700);
+      Print.out(topnav, () => { location.href = back.getAttribute("href"); });
     });
   </script>
 </body>

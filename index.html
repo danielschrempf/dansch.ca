@@ -7,6 +7,7 @@
   <title>dansch</title>
   <meta name="description" content="dansch — Daniel Schrempf, motion graphics + design, London UK.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="print.js"></script>
   <style>
     @font-face {
       font-family: "Degular Mono";
@@ -38,7 +39,6 @@
       scrollbar-gutter: stable;
     }
 
-    /* match the inner pages' centring width */
     body {
       height: 100%;
       margin: 0;
@@ -59,35 +59,12 @@
     }
 
     pre {
-      /* Centre the wordmark glyphs at the viewport middle, deterministically (not
-       flex-centred) so the inner pages can land their header on the exact same rule
-       line — see styles.css .persist-*. The glyphs sit 5 lines below the block top,
-       so margin-top = 50vh − 5 lines; that also puts rule-top / rule-bottom a
-       symmetric ±5 lines from centre. 1.35 = lh. */
+      /* centre the wordmark glyphs at the viewport middle */
       margin: calc(50vh - 5 * 1.35 * var(--fs)) 0 0;
       position: relative;
       z-index: 1;
       font-size: var(--fs);
       white-space: pre;
-      /* gentle fade-in on load — softens the wordmark appearing, incl. after a BACK
-         from an inner page. Pure CSS so it can't get stuck hidden without JS. */
-      animation: fadein .5s ease both;
-    }
-
-    @keyframes fadein {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      pre {
-        animation: none;
-      }
     }
 
     #dot {
@@ -298,6 +275,7 @@
           }
           i = j;
         }
+        if (window.Print) Print.reset(el);   // re-wrap on next print
       }
       function spawnLabel(L) {
         if (!LABELS[L]) return;
@@ -328,14 +306,23 @@
       wm.addEventListener("focusin", lightOn);
       wm.addEventListener("focusout", lightOff);
 
-      wm.addEventListener("click", function (e) {
-        var g = e.target.closest(".g");
-        if (!g || g.tagName === "A") return;
-        var href = HREF[g.dataset.grp];
+      // route every logo link (glyph anchors, rule labels, glyph strokes) through one handler
+      var BLOCKS = [RULES.top, wm, RULES.bottom], leaving = false;
+      document.addEventListener("click", function (e) {
+        var a = e.target.closest("a.g, a.rl"), href = a && a.getAttribute("href");
+        if (!href) {
+          var g = e.target.closest(".g");
+          if (g && g.dataset.grp) href = HREF[g.dataset.grp];
+        }
         if (!href) return;
-        if (/^https?:/.test(href)) window.open(href, "_blank", "noopener");
-        else location.href = href;
-      });
+        e.preventDefault();
+        if (/^https?:/.test(href)) { window.open(href, "_blank", "noopener"); return; }
+        if (leaving) return;
+        leaving = true;
+        Print.out(BLOCKS, function () { location.href = href; });
+      }, true);
+
+      Print.in(BLOCKS);   // print the logo on
     })();
 
     (function () {

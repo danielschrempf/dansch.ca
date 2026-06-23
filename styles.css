@@ -32,9 +32,8 @@
   --rule: var(--fg);
 
   --fs: clamp(0.8rem, 2.6vw, 1rem);
-  /* universal type scale */
   --rest: 10vh;
-  /* where the nav settles, in from the top edge */
+  /* nav rest offset from top */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -53,7 +52,6 @@ body {
   min-height: 100%;
   margin: 0;
   padding-top: var(--rest);
-  /* the nav settles here; content flows below it */
   background: var(--bg);
   color: var(--fg);
   font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -86,51 +84,24 @@ hr {
   margin: 0 auto;
   font-weight: 400;
   line-height: 1.35;
-  --start: var(--rest);
-  transform: translateY(0);
-  transition: transform .7s cubic-bezier(.4, 0, .2, 1);
 }
 
-body.persist-top .topnav {
-  --start: calc(50vh - 5 * 1.35 * var(--fs));
-}
-
-/* index top rule */
-body.persist-bottom .topnav {
-  --start: calc(50vh + 5 * 1.35 * var(--fs));
-}
-
-/* index bottom rule */
-body.persist-top {
-  --rest: calc(50vh - 5 * 1.35 * var(--fs));
-}
-
-.js body:not(.settled) .topnav {
-  transform: translateY(calc(var(--start) - var(--rest)));
-}
-
-.js .sheet {
+/* .sheet blocks pop in (nav.js toggles .shown); no .js = always visible */
+.js .sheet > * {
   opacity: 0;
-  transition: opacity .5s ease;
+  transform: translateY(.4em);
+  transition: opacity .3s ease, transform .3s ease;
 }
 
-.js body.settled .sheet {
+.js .sheet > *.shown {
   opacity: 1;
-  transition-delay: .5s;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .topnav {
-    transition: opacity .5s ease;
-  }
-
-  .js body:not(.settled) .topnav {
-    transform: translateY(0);
-    opacity: 0;
-  }
-
-  .js body.settled .sheet {
-    transition-delay: 0s;
+  .js .sheet > * {
+    transform: none;
+    transition: opacity .3s ease;
   }
 }
 
@@ -225,7 +196,6 @@ h3 {
   margin: 0;
 }
 
-/* tight under the entry title; colours below work anywhere */
 .meta.red {
   color: var(--red);
 }

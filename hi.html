@@ -20,7 +20,7 @@
       color-scheme: light dark;
       --bg: #e6e6d4;
       --fg: #000;
-      --fs: clamp(0.8rem, 2.6vw, 1rem);   /* match index/cv so the header lands on its line */
+      --fs: clamp(0.8rem, 2.6vw, 1rem);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -36,7 +36,7 @@
       margin: 0;
     }
 
-    html { scrollbar-gutter: stable; }   /* same centring width as the other pages */
+    html { scrollbar-gutter: stable; }
 
     body {
       background: var(--bg);
@@ -46,7 +46,6 @@
       overflow: hidden;
     }
 
-    /* The form sits centred, clearing the nav, capped at a comfortable form width. */
     #stage {
       position: fixed;
       inset: 0;
@@ -61,20 +60,14 @@
     body.exiting #stage { opacity: 0; }
 
     #stage .frame {
-      /* No fixed ratio (a Typeform is adaptive UI). Centred; capped width, and a
-         height of 70vh so the top clears the nav (rests at --rest = 10vh) with ~15vh
-         above/below. Narrow screens fall back to 90vw. */
       width: min(90vw, 42rem);
       height: min(70vh, 40rem);
       background: var(--bg);
       border-radius: 8px;
-      overflow: hidden;   /* round the corners */
+      overflow: hidden;   /* clip the oversized iframe (seam crop) */
     }
 
     #stage iframe {
-      /* Oversize a few px and let .frame clip it — same trick as showreel: hides any
-         hairline seam at the iframe's edge. The form centres its content, so cropping
-         the outer couple px costs nothing. */
       width: calc(100% + 4px);
       height: calc(100% + 4px);
       margin: -2px;
@@ -95,20 +88,6 @@
       font-weight: 400;
       color: var(--fg);
       pointer-events: none;
-      /* First paint on the line HI holds on the index wordmark rule (top rule =
-         persist-top: 50vh − 5 lines), measured from its resting top (10vh).
-         .settled slides it home; removing it (on BACK) slides it back to the index
-         line so it hands off to the wordmark. */
-      transform: translateY(calc(50vh - 5 * 1.35 * var(--fs) - 10vh));
-      transition: transform .7s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    body.settled #topnav { transform: translateY(0); }
-
-    @media (prefers-reduced-motion: reduce) {
-      /* No slide — the header fades in place instead. */
-      #topnav { transform: none; transition: opacity .5s ease; opacity: 0; }
-      body.settled #topnav { opacity: 1; }
     }
 
     #topnav a {
@@ -121,6 +100,7 @@
       color: #906;
     }
   </style>
+  <script src="print.js"></script>
   <script src="cursor.js"></script>
 </head>
 
@@ -136,23 +116,16 @@
   <pre id="topnav">=============================== <span class="h">HI</span> == <a href="index.html">BACK</a></pre>
   <script>
     const topnav = document.getElementById("topnav");
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Slide the header from its persisted (landing-page) line up to the top, then
-    // fade the form in behind it. Double rAF so the persisted position paints before
-    // .settled triggers the transition; the timeout (≈ slide duration) gates the fade
-    // without depending on transitionend (which won't fire under reduce).
-    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("settled")));
-    setTimeout(() => document.body.classList.add("ready"), reduce ? 0 : 800);
+    // print the header on, then fade the form in
+    Print.in(topnav, () => document.body.classList.add("ready"));
 
-    // BACK reverses the slide: drop the header back to the index line and fade the
-    // form out, then navigate — handing the line back to the wordmark.
+    // BACK: un-print + fade out, then navigate
     const back = topnav.querySelector("a");
     if (back) back.addEventListener("click", (e) => {
       e.preventDefault();
-      document.body.classList.remove("settled");
       document.body.classList.add("exiting");
-      setTimeout(() => { location.href = back.getAttribute("href"); }, reduce ? 500 : 700);
+      Print.out(topnav, () => { location.href = back.getAttribute("href"); });
     });
   </script>
 </body>
