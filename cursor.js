@@ -19,7 +19,7 @@
     "  pointer-events: none; z-index: 9999; opacity: 0;",
     "  transition: width .2s ease, height .2s ease, background-color .2s ease, opacity .25s ease; }",
     "#dot.over { width: 32px; height: 32px; background-color: transparent; }",
-    ":root { --dot: #000000; }",
+    ":root { --dot: #000; }",
     "@media (prefers-color-scheme: dark) { :root { --dot: #e6e6d4; } }"
   ].join("\n");
   document.head.appendChild(style);

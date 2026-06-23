@@ -19,13 +19,14 @@
     :root {
       color-scheme: light dark;
       --bg: #e6e6d4;
-      --fg: #000000;
-      --fs: clamp(0.8rem, 2.6vw, 1rem);   /* match index/cv so the header lands on its line */
+      --fg: #000;
+      --fs: clamp(0.8rem, 2.6vw, 1rem);
+      /* match index/cv so the header lands on its line */
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #000000;
+        --bg: #000;
         --fg: #e6e6d4;
       }
     }
@@ -36,7 +37,11 @@
       margin: 0;
     }
 
-    html { scrollbar-gutter: stable; }   /* same centring width as the other pages */
+    html {
+      scrollbar-gutter: stable;
+    }
+
+    /* same centring width as the other pages */
 
     body {
       background: var(--bg);
@@ -57,11 +62,17 @@
       transition: opacity .4s ease;
     }
 
-    body.ready #stage { opacity: 1; }
-    body.exiting #stage { opacity: 0; }
+    body.ready #stage {
+      opacity: 1;
+    }
+
+    body.exiting #stage {
+      opacity: 0;
+    }
 
     #stage .frame {
-      aspect-ratio: 45 / 32;   /* the reel's native ratio (Vimeo's 71.11% padding) */
+      aspect-ratio: 45 / 32;
+      /* the reel's native ratio (Vimeo's 71.11% padding) */
       /* Centred, as wide as fits — but cap the height so the frame never clips and
          its top clears the nav (rests at --rest = 10vh). When the height bound binds
          (wide screens) the frame is 70vh tall, leaving 15vh top/bottom, so the top
@@ -69,7 +80,8 @@
       width: min(90vw, calc(70vh * 45 / 32));
       background: #000;
       border-radius: 8px;
-      overflow: hidden;   /* clip the oversized iframe (below): kills the edge seam + rounds the corners */
+      overflow: hidden;
+      /* clip the oversized iframe (below): kills the edge seam + rounds the corners */
     }
 
     #stage iframe {
@@ -104,12 +116,22 @@
       transition: transform .7s cubic-bezier(.4, 0, .2, 1);
     }
 
-    body.settled #topnav { transform: translateY(0); }
+    body.settled #topnav {
+      transform: translateY(0);
+    }
 
     @media (prefers-reduced-motion: reduce) {
+
       /* No slide — the header fades in place instead. */
-      #topnav { transform: none; transition: opacity .5s ease; opacity: 0; }
-      body.settled #topnav { opacity: 1; }
+      #topnav {
+        transform: none;
+        transition: opacity .5s ease;
+        opacity: 0;
+      }
+
+      body.settled #topnav {
+        opacity: 1;
+      }
     }
 
     #topnav a {
@@ -119,7 +141,7 @@
     }
 
     #topnav .s {
-      color: #FF9933;
+      color: #06F;
     }
   </style>
   <script src="cursor.js"></script>
@@ -130,8 +152,7 @@
     <div class="frame">
       <iframe
         src="https://player.vimeo.com/video/1051603658?badge=0&title=0&byline=0&portrait=0&dnt=1&autopause=0&loop=1"
-        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-        allowfullscreen
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen
         title="dansch showreel"></iframe>
     </div>
   </div>

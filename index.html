@@ -18,13 +18,18 @@
 
     :root {
       color-scheme: light dark;
-      --blue: #0066FF;
-      --orange: #FF9933;
-      --spruce: #003333;
-      --red: #FF3333;
-      --green: #33CC99;
-      --fuchsia: #990066;
-      --dot: #000000;
+
+      --red: #F33;
+      --orange: #F93;
+      --spruce: #033;
+      --blue: #06F;
+      --green: #3C9;
+      --fuchsia: #906;
+
+      --cream: #E6E6D4;
+      --black: #000;
+
+      --dot: var(--black);
       --fs: clamp(0.8rem, 2.6vw, 1rem);
     }
 
@@ -41,8 +46,8 @@
       flex-direction: column;
       align-items: center;
       padding: 0 1.5rem;
-      background: #e6e6d4;
-      color: #000000;
+      background: var(--cream);
+      color: var(--black);
       font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       font-weight: 400;
       line-height: 1.35;
@@ -70,12 +75,19 @@
     }
 
     @keyframes fadein {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      pre { animation: none; }
+      pre {
+        animation: none;
+      }
     }
 
     #dot {
@@ -118,8 +130,12 @@
       text-decoration: none;
     }
 
+    .g.lit.d {
+      color: var(--red);
+    }
+
     .g.lit.a {
-      color: var(--blue);
+      color: var(--orange);
     }
 
     .g.lit.n {
@@ -127,18 +143,14 @@
     }
 
     .g.lit.s {
-      color: var(--orange);
+      color: var(--blue);
     }
 
     .g.lit.c {
-      color: var(--red);
-    }
-
-    .g.lit.h {
       color: var(--green);
     }
 
-    .g.lit.d {
+    .g.lit.h {
       color: var(--fuchsia);
     }
 
@@ -146,8 +158,12 @@
       text-decoration: none;
     }
 
+    .rl.d {
+      color: var(--red);
+    }
+
     .rl.a {
-      color: var(--blue);
+      color: var(--orange);
     }
 
     .rl.n {
@@ -155,29 +171,25 @@
     }
 
     .rl.s {
-      color: var(--orange);
+      color: var(--blue);
     }
 
     .rl.c {
-      color: var(--red);
-    }
-
-    .rl.h {
       color: var(--green);
     }
 
-    .rl.d {
+    .rl.h {
       color: var(--fuchsia);
     }
 
     @media (prefers-color-scheme: dark) {
       body {
-        background: #000000;
-        color: #e6e6d4;
+        background: var(--black);
+        color: var(--cream);
       }
 
       :root {
-        --dot: #e6e6d4;
+        --dot: var(--cream);
       }
     }
   </style>

@@ -5,6 +5,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Degular Mono";
   src: url("fonts/DegularMonoVariable.woff2") format("woff2");
@@ -16,23 +17,26 @@
 :root {
   color-scheme: light dark;
 
-  --red:    #FF3333;
-  --orange: #FF9933;
-  --green:  #33CC99;
-  --spruce: #003333;
-  --blue:   #0066FF;
-  --violet: #6633CC;
+  --red: #F33;
+  --orange: #F93;
+  --spruce: #033;
+  --blue: #06F;
+  --green: #3C9;
+  --fuchsia: #906;
 
   --cream: #E6E6D4;
-  --black: #000000;
+  --black: #000;
 
-  --bg:    var(--cream);
-  --fg:    var(--black);
-  --rule:  var(--fg);
+  --bg: var(--cream);
+  --fg: var(--black);
+  --rule: var(--fg);
 
-  --fs: clamp(0.8rem, 2.6vw, 1rem);   /* universal type scale */
-  --rest: 10vh;                       /* where the nav settles, in from the top edge */
+  --fs: clamp(0.8rem, 2.6vw, 1rem);
+  /* universal type scale */
+  --rest: 10vh;
+  /* where the nav settles, in from the top edge */
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: var(--black);
@@ -40,16 +44,16 @@
   }
 }
 
-/* Reserve the scrollbar gutter on every page so the centred column is the same
-   width whether or not the page scrolls — otherwise a long page (cv) loses the
-   scrollbar's width and its centred header drifts ~half a cell left of the short
-   pages / the index wordmark. */
-html { height: 100%; scrollbar-gutter: stable; }
+html {
+  height: 100%;
+  scrollbar-gutter: stable;
+}
 
 body {
   min-height: 100%;
   margin: 0;
-  padding-top: var(--rest);   /* the nav settles here; content flows below it */
+  padding-top: var(--rest);
+  /* the nav settles here; content flows below it */
   background: var(--bg);
   color: var(--fg);
   font-family: "Degular Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -64,8 +68,11 @@ body {
   margin-inline: auto;
   padding-block: 2.5rem 6rem;
 }
+
 @media (min-width: 48rem) {
-  .sheet { padding-block: 3.5rem 8rem; }
+  .sheet {
+    padding-block: 3.5rem 8rem;
+  }
 }
 
 hr {
@@ -78,77 +85,167 @@ hr {
   width: fit-content;
   margin: 0 auto;
   font-weight: 400;
-  line-height: 1.35;   /* match the index wordmark so the header lands on its line */
-  /* Entry/exit slide. Resting at the top (--rest) is the *default* — so with no JS the
-     page is just a normal top-aligned page. With JS the header instead paints on the
-     line its label holds on the index wordmark rule (--start, per page below — same
-     1.35 lh + --fs as index so the rows coincide) until .settled is added, then slides
-     to rest; it's laid out at --rest, so the offset is (start − rest). nav.js adds
-     .settled on load and drops it on BACK (slide back to the index line, then navigate).
-     The 50vh anchor must match the index <pre>'s. */
+  line-height: 1.35;
   --start: var(--rest);
   transform: translateY(0);
   transition: transform .7s cubic-bezier(.4, 0, .2, 1);
 }
-body.persist-top    .topnav { --start: calc(50vh - 5 * 1.35 * var(--fs)); }  /* index top rule */
-body.persist-bottom .topnav { --start: calc(50vh + 5 * 1.35 * var(--fs)); }  /* index bottom rule */
-/* about is short: keep its header on the index rule line (≈ centre) with the content
-   below, instead of sliding to the top. rest = start, so the slide distance is 0 — only
-   the content fade remains. (Also sets body padding-top, so the content sits below it.) */
-body.persist-top { --rest: calc(50vh - 5 * 1.35 * var(--fs)); }
-.js body:not(.settled) .topnav { transform: translateY(calc(var(--start) - var(--rest))); }
 
-/* Content fades in once the nav has settled (and out as it leaves). Scoped to .js
-   (set by nav.js before first paint) so the page is never hidden if JS doesn't run. */
-.js .sheet { opacity: 0; transition: opacity .5s ease; }
-.js body.settled .sheet { opacity: 1; transition-delay: .5s; }
-
-@media (prefers-reduced-motion: reduce) {
-  /* No slide — the header and content fade in place instead (gentler than the
-     translate, still honours the setting). The .sheet fade is reused from above,
-     just with its slide-wait delay dropped so it tracks the header. */
-  .topnav { transition: opacity .5s ease; }
-  .js body:not(.settled) .topnav { transform: translateY(0); opacity: 0; }
-  .js body.settled .sheet { transition-delay: 0s; }
+body.persist-top .topnav {
+  --start: calc(50vh - 5 * 1.35 * var(--fs));
 }
 
-.topnav a { color: inherit; text-decoration: none; }
-.topnav .a { color: var(--blue); }
-.topnav .c { color: var(--red); }
-.topnav .n { color: var(--spruce); }
+/* index top rule */
+body.persist-bottom .topnav {
+  --start: calc(50vh + 5 * 1.35 * var(--fs));
+}
 
-a { color: inherit; }
+/* index bottom rule */
+body.persist-top {
+  --rest: calc(50vh - 5 * 1.35 * var(--fs));
+}
+
+.js body:not(.settled) .topnav {
+  transform: translateY(calc(var(--start) - var(--rest)));
+}
+
+.js .sheet {
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+
+.js body.settled .sheet {
+  opacity: 1;
+  transition-delay: .5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topnav {
+    transition: opacity .5s ease;
+  }
+
+  .js body:not(.settled) .topnav {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  .js body.settled .sheet {
+    transition-delay: 0s;
+  }
+}
+
+.topnav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.topnav .a {
+  color: var(--orange);
+}
+
+.topnav .n {
+  color: var(--spruce);
+}
+
+.topnav .c {
+  color: var(--green);
+}
+
+a {
+  color: inherit;
+}
 
 h1 {
-  font-size: 1.5em; font-weight: 400; line-height: 1.25;
-  letter-spacing: .02em; margin: 0 0 .4rem;
+  font-size: 1.5em;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: .02em;
+  margin: 0 0 .4rem;
 }
 
 .section {
   margin: 3rem 0;
   font-weight: 400;
 }
-.section.red    { color: var(--red); }
-.section.blue   { color: var(--blue); }
-.section.orange { color: var(--orange); }
-.section.violet { color: var(--violet); }
-.section.green  { color: var(--green); }
-.section.spruce { color: var(--spruce); }
 
-p { margin: 0 0 1.5rem; }
-p:last-child { margin-bottom: 0; }
-nav { font-size: .9rem; }
+.section.red {
+  color: var(--red);
+}
+
+.section.orange {
+  color: var(--orange);
+}
+
+.section.spruce {
+  color: var(--spruce);
+}
+
+.section.blue {
+  color: var(--blue);
+}
+
+.section.green {
+  color: var(--green);
+}
+
+.section.fuchsia {
+  color: var(--fuchsia);
+}
+
+p {
+  margin: 0 0 1.5rem;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+nav {
+  font-size: .9rem;
+}
 
 h3 {
-  font-size: 1em; font-weight: 400; line-height: 1.3;
-  text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .15rem;
+  font-size: 1em;
+  font-weight: 400;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin: 0 0 .15rem;
 }
-.entry { margin: 0 0 2.6rem; }
-.entry p { margin: .9rem 0 0; }
-.entry .meta { margin: 0; }   /* tight under the entry title; colours below work anywhere */
-.meta.red    { color: var(--red); }
-.meta.blue   { color: var(--blue); }
-.meta.orange { color: var(--orange); }
-.meta.violet { color: var(--violet); }
-.meta.green  { color: var(--green); }
-.meta.spruce { color: var(--spruce); }
+
+.entry {
+  margin: 0 0 2.6rem;
+}
+
+.entry p {
+  margin: .9rem 0 0;
+}
+
+.entry .meta {
+  margin: 0;
+}
+
+/* tight under the entry title; colours below work anywhere */
+.meta.red {
+  color: var(--red);
+}
+
+.meta.orange {
+  color: var(--orange);
+}
+
+.meta.spruce {
+  color: var(--spruce);
+}
+
+.meta.blue {
+  color: var(--blue);
+}
+
+.meta.green {
+  color: var(--green);
+}
+
+.meta.fuchsia {
+  color: var(--fuchsia);
+}
