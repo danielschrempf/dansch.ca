@@ -196,6 +196,11 @@ h3 {
   margin: 0;
 }
 
+/* notebook prose breaks mono — long entries read better proportional */
+.notebook .entry p:not(.meta) {
+  font-family: "Degular", system-ui, sans-serif;
+}
+
 .meta.red {
   color: var(--red);
 }
