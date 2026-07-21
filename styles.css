@@ -32,8 +32,7 @@
   --rule: var(--fg);
 
   --fs: clamp(0.8rem, 2.6vw, 1rem);
-  --rest: 10vh;
-  /* nav rest offset from top */
+  --rest: 10vh;   /* nav offset from the top */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -86,7 +85,7 @@ hr {
   line-height: 1.35;
 }
 
-/* .sheet blocks pop in (nav.js toggles .shown); no .js = always visible */
+/* .sheet blocks pop in when the page script adds .shown; no .js = always visible */
 .js .sheet > * {
   opacity: 0;
   transform: translateY(.4em);
@@ -196,7 +195,7 @@ h3 {
   margin: 0;
 }
 
-/* notebook prose breaks mono — long entries read better proportional */
+/* notebook entry prose is proportional, not mono */
 .notebook .entry p:not(.meta) {
   font-family: "Degular", system-ui, sans-serif;
   font-size: 1.2em;

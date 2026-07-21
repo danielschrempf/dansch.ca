@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
 """Compress & tidy Lottie JSON for the dansch.ca demos page.
 
-Works on exports from After Effects (Bodymovin) and Cavalry — same schema,
-same treatment. Render-preserving by default; the big win is just stripping
-the exporter's pretty-print whitespace.
+Takes exports from After Effects (Bodymovin) and Cavalry — same schema, same
+treatment — and rewrites them in place. Render-preserving by default.
 
 What it does:
-  - minify            strip pretty-print whitespace (the dominant saving)
-  - round floats      to --dp decimals (default 3; exporters emit float noise)
+  - minify            strip pretty-print whitespace
+  - round floats      to --dp decimals (default 3)
   - drop metadata     editor-only keys: layer/shape names (nm, mn), the meta
                       generator block, empty top-level props/markers
-  - normalise colour  set every solid fill/stroke to black. The demos page
-                      recolours to the theme (--fg) at runtime, so the stored
-                      colour is cosmetic; black keeps the source files uniform
-                      and visible if JS is off. Skip with --keep-colour.
+  - normalise colour  set every solid fill/stroke to black; the demos page
+                      recolours to the theme (--fg) at runtime. Skip with
+                      --keep-colour.
 
-Safety: if a file contains baked expressions (a "x":"..." property), names are
-*kept* for that file (expressions can reference them) and a note is printed.
+If a file contains baked expressions (an "x":"..." property), names are *kept*
+for that file — expressions can reference them — and a note is printed.
 
 Usage:
-  tools/clean-lottie.py demos/*.json                # tidy in place, report savings
-  tools/clean-lottie.py --dry-run demos/*.json      # report only, write nothing
-  tools/clean-lottie.py --dp 6 demos/009.json       # gentler rounding for a delicate one
-  tools/clean-lottie.py --keep-colour logo.json     # leave fills/strokes as authored
+  tools/clean-lottie.py demos/*.json                     # tidy in place, report savings
+  tools/clean-lottie.py --dry-run demos/*.json           # report only, write nothing
+  tools/clean-lottie.py --dp 6 demos/2026-06-23.json     # gentler rounding
+  tools/clean-lottie.py --keep-colour logo.json          # leave fills/strokes as authored
 """
 import argparse, json, os, sys
 
-NAME_KEYS = {"nm", "mn"}          # exporter names — unused at render (unless expressions)
+NAME_KEYS = {"nm", "mn"}          # exporter names, unused at render
 
 
 def transform(o, dp, keep_colour, drop_names):
@@ -63,7 +61,7 @@ def process(path, args):
     drop_names = not has_expr
     doc = transform(doc, args.dp, args.keep_colour, drop_names)
 
-    doc.pop("meta", None)              # exporter/author block — not needed to render
+    doc.pop("meta", None)              # exporter/author block
     doc.pop("props", None)
     if not doc.get("markers"):
         doc.pop("markers", None)

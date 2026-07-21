@@ -1,4 +1,4 @@
-// Shared "print" transition: types a monospace element on/off, character by character.
+// "Print" transition: types a monospace element on/off, character by character.
 // Print.in(target[, done]) / Print.out(target[, done]); target = element or array.
 (function () {
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -8,7 +8,7 @@
   style.textContent = ".ch { opacity: 0; }";
   document.head.appendChild(style);
 
-  // split each char into a .ch span (reusing existing .g units); cache the list
+  // split each char into a .ch span (existing .g units are reused); cache the list
   function wrap(el) {
     if (el._units) return el._units;
     var out = [];

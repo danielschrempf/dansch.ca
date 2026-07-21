@@ -1,5 +1,5 @@
-// Shared custom cursor for the inner pages: a dot that swells to a ring over links.
-// Self-injecting (#dot + styles); link as the last <head> script. Mouse-only.
+// Custom cursor for the inner pages: a dot that swells to a ring over links.
+// Injects its own #dot + styles; link it as the last <head> script. Mouse-only.
 (function () {
   var style = document.createElement("style");
   style.textContent = [

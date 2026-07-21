@@ -1,5 +1,5 @@
-// Inner-page transition driver (about, cv, notebook): nav prints on, then .sheet
-// blocks pop in staggered; BACK reverses both, then navigates.
+// Transition driver for about + cv: the nav prints on, then .sheet blocks pop in
+// staggered; BACK reverses both, then navigates.
 (function () {
   document.documentElement.classList.add("js");
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;

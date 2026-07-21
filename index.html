@@ -275,7 +275,7 @@
           }
           i = j;
         }
-        if (window.Print) Print.reset(el);   // re-wrap on next print
+        if (window.Print) Print.reset(el);   // re-wrap on the next print
       }
       function spawnLabel(L) {
         if (!LABELS[L]) return;
@@ -306,7 +306,7 @@
       wm.addEventListener("focusin", lightOn);
       wm.addEventListener("focusout", lightOff);
 
-      // route every logo link (glyph anchors, rule labels, glyph strokes) through one handler
+      // one handler for every logo link: glyph anchors, rule labels, plain strokes
       var BLOCKS = [RULES.top, wm, RULES.bottom], leaving = false;
       document.addEventListener("click", function (e) {
         var a = e.target.closest("a.g, a.rl"), href = a && a.getAttribute("href");
@@ -322,7 +322,7 @@
         Print.out(BLOCKS, function () { location.href = href; });
       }, true);
 
-      Print.in(BLOCKS);   // print the logo on
+      Print.in(BLOCKS);
     })();
 
     (function () {
@@ -393,7 +393,7 @@
 
       document.addEventListener("touchmove", function (e) {
         onTouch(e);
-        e.preventDefault();   // prevent scroll / overscroll during swipe
+        e.preventDefault();   // no scroll / overscroll during a swipe
       }, { passive: false });
 
       document.addEventListener("touchend", function (e) {

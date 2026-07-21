@@ -139,14 +139,13 @@
     let files = [], i = 0, anim = null, seq = 0;
     const cache = new Map();
 
-    // list demos/*.json via GitHub's contents API (static hosting can't list a
-    // dir); newest first by the ISO date in the filename. Content is fetched
-    // same-origin in load(), so only this listing spends the API quota.
+    // list demos/*.json through GitHub's contents API, newest first by the ISO
+    // date in the filename; load() then fetches the file itself same-origin
     async function discover() {
       let res;
       try { res = await fetch(API, { headers: { Accept: "application/vnd.github+json" } }); }
       catch (_) { return []; }
-      if (!res.ok) return [];                     // e.g. rate-limited: no sketches
+      if (!res.ok) return [];                     // rate-limited or missing: no sketches
       return (await res.json())
         .filter((f) => f.type === "file" && DATE.test(f.name))
         .map((f) => f.name)
@@ -180,7 +179,7 @@
     }
 
     async function show(idx) {
-      const mine = ++seq;   // a later click/theme-change supersedes us
+      const mine = ++seq;   // a later click or theme change supersedes this one
       const doc = tint(await load(files[idx]), inkRGB());
       if (mine !== seq) return;
       if (anim) anim.destroy();
@@ -203,7 +202,7 @@
       };
     }
 
-    // print the header on; gates the sketches (with discovery)
+    // print the header on; together with discovery this gates the sketches
     const printed = new Promise((r) => Print.in(topnav, r));
 
     // BACK: un-print both navs + fade out, then navigate
@@ -217,7 +216,7 @@
 
     Promise.all([discover(), printed]).then(([list]) => {
       files = list;                               // newest-first
-      if (!files.length) return;                  // no sketches — leave the nav hidden
+      if (!files.length) return;                  // no sketches: leave the nav hidden
       i = 0;                                       // start on the newest
       show(i);
       document.body.classList.add("ready");

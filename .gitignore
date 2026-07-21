@@ -1,7 +1,7 @@
 .DS_Store
 *.log
 
-# local build/ops note — keep out of the public repo
+# local build/ops note, symlinked in from the private repo
 CLAUDE.md
 
 # python

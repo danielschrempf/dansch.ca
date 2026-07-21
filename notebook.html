@@ -19,33 +19,29 @@
 
     <pre class="section spruce">================= NOTES ==================</pre>
 
-    <!-- entries are pulled from notes/YYYY-MM-DD.md at load; see notes/README.md -->
+    <!-- entries are injected here from notes/YYYY-MM-DD.md at load -->
 
   </main>
 
   <script>
-    // Notebook entries are date-named Markdown files in notes/ (drop an Obsidian
-    // daily note in, unedited, and commit). Static hosting can't list a directory,
-    // so the folder is listed via GitHub's public contents API; each file is then
-    // fetched from our own domain (saves API quota). The date is the filename; the
-    // body just splits on blank lines. Then: print the nav on + pop the blocks in
-    // (the nav.js move, inline so it can wait for the async content).
+    // Entries are the date-named Markdown files in notes/: the folder is listed
+    // through GitHub's public contents API, each file then fetched same-origin.
+    // The nav prints on and the blocks pop in once the entries are in the DOM.
     (function () {
       var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
       var API = "https://api.github.com/repos/danielschrempf/dansch.ca/contents/notes";
       var FOLDER = "notes/";
-      var DATE = /^(\d{4}-\d{2}-\d{2})\.md$/;   // date-named notes only (skips README etc.)
+      var DATE = /^(\d{4}-\d{2}-\d{2})\.md$/;   // date-named notes only
       var sheet = document.querySelector(".sheet");
       var nav = document.querySelector(".topnav");
 
-      // drop a leading YAML front-matter block (e.g. Obsidian properties)
+      // strip a leading YAML front-matter block
       function stripFrontMatter(t) {
         return t.replace(/^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n/, "");
       }
 
-      // body -> paragraphs; also drop a leading '# ' heading if present (the date
-      // is the filename now, so a title line would just be noise). Blank lines
-      // split paragraphs; soft line-wraps inside one collapse to spaces.
+      // body -> paragraphs: blank lines split them, soft line-wraps inside one
+      // collapse to spaces, and a leading '# ' heading is dropped
       function paragraphs(text) {
         var body = stripFrontMatter(text).replace(/\r\n/g, "\n").trim().replace(/^#\s+.*(?:\n|$)/, "").trim();
         return body ? body.split(/\n[ \t]*\n/).map(function (p) {
@@ -58,7 +54,7 @@
         var res;
         try { res = await fetch(API, { headers: { Accept: "application/vnd.github+json" } }); }
         catch (_) { return []; }
-        if (!res.ok) return [];                  // e.g. rate-limited: fall back to an empty notebook
+        if (!res.ok) return [];                  // rate-limited or missing: empty notebook
         return (await res.json())
           .filter(function (f) { return f.type === "file" && DATE.test(f.name); })
           .map(function (f) { return f.name; })
@@ -66,7 +62,7 @@
       }
 
       async function loadNote(name) {
-        var res = await fetch(FOLDER + name);    // same origin — doesn't touch the API quota
+        var res = await fetch(FOLDER + name);    // same origin, so no API quota
         return { date: name.match(DATE)[1], paras: paragraphs(await res.text()) };
       }
 
@@ -106,11 +102,11 @@
 
       var printed = new Promise(function (r) { Print.in(nav, r); });
 
-      // reveal once the nav has printed AND the entries are in the DOM
+      // reveal once the nav has printed and the entries are in the DOM
       Promise.all([collect(), printed]).then(function (res) {
         render(res[0]);
         pop(true, 600);
-      }).catch(function () { pop(true, 600); });   // whatever fails, still show the header
+      }).catch(function () { pop(true, 600); });   // on failure, still show the header
 
       // BACK: pop the blocks out + un-print the nav, then navigate
       var back = nav.querySelector("a");
