@@ -130,6 +130,8 @@
   <script src="vendor/lottie.min.js"></script>
   <script>
     const FOLDER = "demos/";
+    const API = "https://api.github.com/repos/danielschrempf/dansch.ca/contents/demos";
+    const DATE = /^(\d{4}-\d{2}-\d{2})\.json$/;   // date-named sketches only
     const stage = document.getElementById("stage");
     const bottomnav = document.getElementById("bottomnav");
     const topnav = document.getElementById("topnav");
@@ -137,17 +139,18 @@
     let files = [], i = 0, anim = null, seq = 0;
     const cache = new Map();
 
+    // list demos/*.json via GitHub's contents API (static hosting can't list a
+    // dir); newest first by the ISO date in the filename. Content is fetched
+    // same-origin in load(), so only this listing spends the API quota.
     async function discover() {
-      const found = [];
-      for (let n = 1; n < 1000; n++) {
-        const name = String(n).padStart(3, "0") + ".json";
-        try {
-          const res = await fetch(FOLDER + name, { method: "HEAD" });
-          if (!res.ok) break;
-          found.push(name);
-        } catch (_) { break; }
-      }
-      return found;
+      let res;
+      try { res = await fetch(API, { headers: { Accept: "application/vnd.github+json" } }); }
+      catch (_) { return []; }
+      if (!res.ok) return [];                     // e.g. rate-limited: no sketches
+      return (await res.json())
+        .filter((f) => f.type === "file" && DATE.test(f.name))
+        .map((f) => f.name)
+        .sort().reverse();
     }
 
     async function load(name) {
@@ -213,14 +216,14 @@
     });
 
     Promise.all([discover(), printed]).then(([list]) => {
-      files = list;
+      files = list;                               // newest-first
       if (!files.length) return;                  // no sketches — leave the nav hidden
-      i = files.length - 1;
+      i = 0;                                       // start on the newest
       show(i);
       document.body.classList.add("ready");
       Print.in(bottomnav);
-      bottomnav.querySelector(".prev").addEventListener("click", go(+1));   // newer
-      bottomnav.querySelector(".next").addEventListener("click", go(-1));   // older
+      bottomnav.querySelector(".prev").addEventListener("click", go(-1));   // newer
+      bottomnav.querySelector(".next").addEventListener("click", go(+1));   // older
       darkMQ.addEventListener("change", () => show(i));
     });
   </script>

@@ -8,8 +8,8 @@
   <meta name="description" content="Notebook — notes from Daniel Schrempf, motion graphics + design, London England.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js");</script>
   <script src="print.js"></script>
-  <script src="nav.js"></script>
   <script src="cursor.js"></script>
 </head>
 
@@ -19,41 +19,108 @@
 
     <pre class="section spruce">================= NOTES ==================</pre>
 
-    <div class="entry">
-      <p class="meta spruce">2026-07-12</p>
-      <p>
-        There’s lots of things to critique Gen AI for, but if we narrow the discussion to raw artistic value, I’m
-        starting to figure out why it’s hard to love. It’s just opt-in nepotism.
-      </p>
-      <p>
-        From my bubble, it looks like it’s about a 80/20 split between the refusers and the apologists. It seems
-        like it’s generally painted this way: the refusers have the moral high ground, but are embarrassed about
-        appearing elitist or closed-minded; the apologists have to stay on their toes socially, they’ve ceded the
-        ethical territory, but can soothe themselves with the idea that they’re on the right side of someone’s future.
-        When it gets heated, the refusers get framed as gatekeepers and the apologists as cannibals. The grid lock
-        happens quickly, each side has too much to lose by blinking first.
-      </p>
-      <p>
-        What I realized yesterday is that I don’t hate Gen AI apologists on moral grounds, or because I see them as
-        Jurassic Park flavoured, accelerationists (although, evidently, there's some heavy resentment). It’s rare, but,
-        I’ll admit I do see the visual value every once in a while, so my malice is illegitimate. The problem is, this
-        attraction is especially short lived. I’ve seen lots of great work in the past that was tainted as soon as I
-        figured out who made it, or how. We always want a story. We need a plausible scenario where all our hero's love
-        us. Discovering that something we love has (at best) no more story to give you, is heartbreaking.
-      </p>
-      <p>
-        Finding out someone you respect is just a big someone’s son, feels the same as finding out something was
-        just spat out of a GPU. It's not like it's irredeemable, but it's a rough first impression. They just
-        bought their way in. The feeling you get off an apologist is, "Why don't you love me, why can't you see it's
-        great", and the answer is, "Because you made a promise and gave me nothing. You made this for you, not for me,
-        not for anyone else."
-      </p>
-      <p>
-        Even the most vapid aesthetes are human, and they'll take a good story over almost anything.
-      </p>
-    </div>
+    <!-- entries are pulled from notes/YYYY-MM-DD.md at load; see notes/README.md -->
 
   </main>
+
+  <script>
+    // Notebook entries are date-named Markdown files in notes/ (drop an Obsidian
+    // daily note in, unedited, and commit). Static hosting can't list a directory,
+    // so the folder is listed via GitHub's public contents API; each file is then
+    // fetched from our own domain (saves API quota). The date is the filename; the
+    // body just splits on blank lines. Then: print the nav on + pop the blocks in
+    // (the nav.js move, inline so it can wait for the async content).
+    (function () {
+      var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var API = "https://api.github.com/repos/danielschrempf/dansch.ca/contents/notes";
+      var FOLDER = "notes/";
+      var DATE = /^(\d{4}-\d{2}-\d{2})\.md$/;   // date-named notes only (skips README etc.)
+      var sheet = document.querySelector(".sheet");
+      var nav = document.querySelector(".topnav");
+
+      // drop a leading YAML front-matter block (e.g. Obsidian properties)
+      function stripFrontMatter(t) {
+        return t.replace(/^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n/, "");
+      }
+
+      // body -> paragraphs; also drop a leading '# ' heading if present (the date
+      // is the filename now, so a title line would just be noise). Blank lines
+      // split paragraphs; soft line-wraps inside one collapse to spaces.
+      function paragraphs(text) {
+        var body = stripFrontMatter(text).replace(/\r\n/g, "\n").trim().replace(/^#\s+.*(?:\n|$)/, "").trim();
+        return body ? body.split(/\n[ \t]*\n/).map(function (p) {
+          return p.trim().replace(/\s*\n\s*/g, " ");
+        }).filter(Boolean) : [];
+      }
+
+      // list notes/*.md via the contents API; newest first by the ISO filename date
+      async function listNotes() {
+        var res;
+        try { res = await fetch(API, { headers: { Accept: "application/vnd.github+json" } }); }
+        catch (_) { return []; }
+        if (!res.ok) return [];                  // e.g. rate-limited: fall back to an empty notebook
+        return (await res.json())
+          .filter(function (f) { return f.type === "file" && DATE.test(f.name); })
+          .map(function (f) { return f.name; })
+          .sort().reverse();
+      }
+
+      async function loadNote(name) {
+        var res = await fetch(FOLDER + name);    // same origin — doesn't touch the API quota
+        return { date: name.match(DATE)[1], paras: paragraphs(await res.text()) };
+      }
+
+      function render(notes) {
+        notes.forEach(function (note) {
+          if (!note.paras.length) return;
+          var entry = document.createElement("div");
+          entry.className = "entry";
+          var meta = document.createElement("p");
+          meta.className = "meta spruce";
+          meta.textContent = note.date;
+          entry.appendChild(meta);
+          note.paras.forEach(function (text) {
+            var p = document.createElement("p");
+            p.textContent = text;
+            entry.appendChild(p);
+          });
+          sheet.appendChild(entry);
+        });
+      }
+
+      // toggle .shown across .sheet blocks, stagger spread over budget ms
+      function pop(show, budget) {
+        var blocks = [].slice.call(sheet.children);
+        var n = blocks.length;
+        var step = reduce || n < 2 ? 0 : Math.min(80, budget / (n - 1));
+        blocks.forEach(function (b, i) {
+          b.style.transitionDelay = (show ? i : n - 1 - i) * step + "ms";
+          b.classList.toggle("shown", show);
+        });
+      }
+
+      async function collect() {
+        var names = await listNotes();
+        return Promise.all(names.map(loadNote));   // map keeps the newest-first order
+      }
+
+      var printed = new Promise(function (r) { Print.in(nav, r); });
+
+      // reveal once the nav has printed AND the entries are in the DOM
+      Promise.all([collect(), printed]).then(function (res) {
+        render(res[0]);
+        pop(true, 600);
+      }).catch(function () { pop(true, 600); });   // whatever fails, still show the header
+
+      // BACK: pop the blocks out + un-print the nav, then navigate
+      var back = nav.querySelector("a");
+      if (back) back.addEventListener("click", function (e) {
+        e.preventDefault();
+        pop(false, 200);
+        Print.out(nav, function () { location.href = back.getAttribute("href"); });
+      });
+    })();
+  </script>
 </body>
 
 </html>
